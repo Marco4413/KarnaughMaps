@@ -1,2 +1,2 @@
 
-Paint a group of numbers.
+A Karnaugh Map Visualizer.
