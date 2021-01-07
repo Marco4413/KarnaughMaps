@@ -41,17 +41,45 @@ function getRectPosSize(topLeft, bottomRight) {
     return [ origin, rectSize ];
 }
 
-window.grid = [
-    [ "  ", "00", "01", "11", "10" ],
-    [ "00",  "1",  "1",  "0",  "0" ],
-    [ "01",  "0",  "0",  "0",  "1" ],
-    [ "11",  "0",  "1",  "0",  "1" ],
-    [ "10",  "1",  "1",  "0",  "0" ]
-];
+let horVariables = 0;
+let verVariables = 0;
 
-const confirmedGroups = [ ];
+const variableNames = [ "A", "B", "C", "D" ];
+const variableValues = [ "00", "01", "11", "10" ];
+
+
+window.grid = [ ];
+
+let confirmedGroups = [ ];
 
 const currentColor = [ 255, 0, 0 ];
+
+/**
+ * @param {Number} n
+ * @param {Boolean} resetSelections
+ */
+window.changeVariableCount = (n, resetSelections = true) => {
+    switch (n) {
+        case 2: {
+            horVariables = 1;
+            verVariables = 1;
+            break;
+        }
+        case 3: {
+            horVariables = 2;
+            verVariables = 1;
+            break;
+        }
+        default: {
+            horVariables = 2;
+            verVariables = 2;
+        }
+    }
+
+    if (resetSelections) {
+        confirmedGroups = [ ];
+    }
+}
 
 function confirmRect() {
     const [ origin, rectSize ] = getRectPosSize( ...getSelectionCorners() );
@@ -74,14 +102,43 @@ function confirmRect() {
  */
 function draw(canvas, deltaTime) {
 
-    canvas.textSize(window.cellSize / 2);
     canvas.clear();
 
     canvas.fill(255, 255, 255);
-    for (let y = 0; y < window.grid.length; y++) {
+    canvas.stroke(255, 255, 255);
+
+    const rows = Math.pow(2, verVariables);
+    const cols = Math.pow(2, horVariables);
+
+    {
+        let firstRow = variableNames.slice(0, horVariables).join("");
+        let firstCol = variableNames.slice(horVariables, horVariables + verVariables).join("");
+
+        canvas.textSize(window.cellSize * 0.33);
+        const origin = new UMath.Vec2(window.cellSize / 2, window.cellSize / 2);
+        canvas.line(0, 0, window.cellSize, window.cellSize);
+        canvas.text(firstRow, origin.x + 2.5, origin.y - 2.5, { "noStroke": true, "horizontalAlignment": "left", "verticalAlignment": "top" });
+        canvas.text(firstCol, origin.x - 2.5, origin.y + 2.5, { "noStroke": true, "horizontalAlignment": "right", "verticalAlignment": "bottom" });
+
+        for (let x = 0; x < cols; x++) {
+            const text = variableValues[x].substr(-horVariables);
+            canvas.text(text, window.cellSize + x * window.cellSize + window.cellSize / 2, window.cellSize / 2, { "noStroke": true, "horizontalAlignment": "center", "verticalAlignment": "center" });
+        }
+
+        for (let y = 0; y < rows; y++) {
+            const text = variableValues[y].substr(-verVariables);
+            canvas.text(text, window.cellSize / 2, window.cellSize + y * window.cellSize + window.cellSize / 2, { "noStroke": true, "horizontalAlignment": "center", "verticalAlignment": "center" });
+        }
+    }
+
+    canvas.textSize(window.cellSize * 0.5);
+    for (let y = 0; y < rows; y++) {
         const row = window.grid[y];
-        for (let x = 0; x < row.length; x++) {
-            canvas.text(row[x], x * window.cellSize + window.cellSize / 2, y * window.cellSize + window.cellSize / 2, { "noStroke": true, "horizontalAlignment": "center", "verticalAlignment": "center" });
+        if (row === undefined) { break; }
+        for (let x = 0; x < cols; x++) {
+            if (row[x] === undefined) { break; }
+
+            canvas.text(String(row[x]), window.cellSize + x * window.cellSize + window.cellSize / 2, window.cellSize + y * window.cellSize + window.cellSize / 2, { "noStroke": true, "horizontalAlignment": "center", "verticalAlignment": "center" });
         }
     }
 
@@ -110,6 +167,8 @@ function draw(canvas, deltaTime) {
 
 window.addEventListener("load", () => {
 
+    window.changeVariableCount(4);
+
     new wCanvas(
         {
             "onSetup": canvas => {
@@ -129,6 +188,10 @@ window.addEventListener("load", () => {
                 });
 
                 canvas.startLoop();
+            },
+            "onResize": (canvas) => {
+                canvas.canvas.width = Math.pow(2, horVariables) * window.cellSize + window.cellSize;
+                canvas.canvas.height = Math.pow(2, verVariables) * window.cellSize + window.cellSize;
             },
             "onDraw": draw
         }
