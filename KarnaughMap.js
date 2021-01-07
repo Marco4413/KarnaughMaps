@@ -204,7 +204,7 @@ export class KarnaughMap {
 
             canvas.text(
                 this.firstRow[i], x + this.cellSize / 2, this.pos.y + this.cellSize / 2,
-                i === 0 ? { "horizontalAlignment": "left", "verticalAlignment": "top" } : { "horizontalAlignment": "center", "verticalAlignment": "center" }
+                { "alignment": i === 0 ? { "horizontal": "left", "vertical": "bottom" } : { "horizontal": "center", "vertical": "center" } }
             );
 
         }
@@ -220,7 +220,7 @@ export class KarnaughMap {
             canvas.text(
                 this.firstCol[i],
                 this.pos.x + this.cellSize / 2, y + this.cellSize / 2,
-                i === 0 ? { "horizontalAlignment": "right", "verticalAlignment": "bottom" } : { "horizontalAlignment": "center", "verticalAlignment": "center" }
+                { "alignment": i === 0 ? { "horizontal": "right", "vertical": "top" } : { "horizontal": "center", "vertical": "center" } }
             );
 
         }
