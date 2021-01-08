@@ -10,10 +10,9 @@ export class KarnaughMap {
      * @param {Number} variableCount - The number of variables it should contain [2; 4]
      * @param {Array<Array<Number>>} startingValues - the values it should start with
      */
-    constructor(x, y, cellSize = 16, variableCount = 4, startingValues = []) {
+    constructor(x, y, cellSize = 16, variableCount = 4) {
 
         this.pos = new UMath.Vec2(x, y);
-        this.values = startingValues;
         this.cellSize = cellSize;
         this.groups = [];
 
@@ -24,10 +23,10 @@ export class KarnaughMap {
     /**
      * @param {Number} count - The new ammount of variables [2; 4]
      * @param {Array<String>} names - The names of the variables (4 must be specified)
-     * @param {Array<String>} values - The values the variables can take (Keep undefined)
+     * @param {Array<String>} binaryValues - The values the variables can take (Keep undefined)
      * @param {Boolean} resetGroups - Whether or not to empty the groups array (Should always be true)
      */
-    changeVariables(count, names = [ "A", "B", "C", "D" ], values = [ "00", "01", "11", "10" ], resetGroups = true) {
+    changeVariables(count, names = [ "A", "B", "C", "D" ], binaryValues = [ "00", "01", "11", "10" ], resetGroups = true) {
         let xVarCount = 0;
         let yVarCount = 0;
 
@@ -54,15 +53,34 @@ export class KarnaughMap {
         const cols = Math.pow(2, xVarCount);
         const rows = Math.pow(2, yVarCount);
         for (let i = 0; i < cols; i++) {
-            this.firstRow.push(values[i].substr(-xVarCount));
+            this.firstRow.push(binaryValues[i].substr(-xVarCount));
         }
         for (let i = 0; i < rows; i++) {
-            this.firstCol.push(values[i].substr(-yVarCount));
+            this.firstCol.push(binaryValues[i].substr(-yVarCount));
+        }
+
+        this.values = [];
+        for (let y = 0; y < rows; y++) {
+            this.values[y] = [];
+            for (let x = 0; x < cols; x++) {
+                this.values[y][x] = 0;
+            }
         }
 
         if (resetGroups) {
             this.groups = [];
         }
+    }
+
+    /**
+     * @param {Number} x - The x coord on the grid of the value to cycle between 0 and 1
+     * @param {Number} y - The y coord on the grid of the value to cycle between 0 and 1
+     */
+    cycleValue(x, y) {
+        if (this.values[y] === undefined) { return; }
+        if (this.values[y][x] === undefined) { return; }
+
+        this.values[y][x] = (this.values[y][x] + 1) % 2;
     }
 
     /**
@@ -239,7 +257,7 @@ export class KarnaughMap {
                 canvas.text(
                     row[x],
                     this.pos.x + this.cellSize * 1.5 + x * this.cellSize, this.pos.y + this.cellSize * 1.5 + y * this.cellSize,
-                    { "horizontalAlignment": "center", "verticalAlignment": "center" }
+                    { "alignment": { "horizontal": "center", "vertical": "center" } }
                 );
             }
         }
