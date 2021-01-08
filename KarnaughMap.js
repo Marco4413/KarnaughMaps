@@ -12,6 +12,11 @@ export class KarnaughMap {
      */
     constructor(x, y, cellSize = 16, variableCount = 4) {
 
+        this.colors = {
+            "fill": [255, 255, 255],
+            "stroke": [255, 255, 255]
+        };
+
         this.pos = new UMath.Vec2(x, y);
         this.cellSize = cellSize;
         this.groups = [];
@@ -210,8 +215,8 @@ export class KarnaughMap {
      * @param {wCanvas} canvas - The canvas to draw the map on
      */
     draw(canvas) {
-        canvas.fill(255, 255, 255);
-        canvas.stroke(255, 255, 255);
+        canvas.fill(...this.colors.fill);
+        canvas.stroke(...this.colors.stroke);
 
         canvas.line(this.pos.x, this.pos.y, this.pos.x + this.cellSize, this.pos.y + this.cellSize);
 
