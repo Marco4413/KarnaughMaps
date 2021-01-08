@@ -100,14 +100,20 @@ export class KarnaughMap {
      * @param {Number} x2 - The ending x coord relative to the grid of the new group
      * @param {Number} y2 - The ending y coord relative to the grid of the new group
      * @param {Array<Number>} color - The color of the new group
+     * @param {Boolean} onlyPowsOf2 - Whether or not to only use powers of base 2 as the group size
      */
-    getAsGroup(x1, y1, x2, y2, color = [255, 255, 255]) {
+    getAsGroup(x1, y1, x2, y2, color = [255, 255, 255], onlyPowsOf2 = true) {
         const gridSize = this.getSize();
 
         const size = new UMath.Vec2(
             x2 - x1 + (x1 > x2 ? gridSize.x : 0),
             y2 - y1 + (y1 > y2 ? gridSize.y : 0)
         ).add(1);
+
+        if (onlyPowsOf2) {
+            size.x = Math.pow(2, Math.floor(Math.log2(size.x)));
+            size.y = Math.pow(2, Math.floor(Math.log2(size.y)));
+        }
 
         return [ x1, y1, size.x, size.y, color ];
     }
@@ -118,10 +124,11 @@ export class KarnaughMap {
      * @param {Number} x2 - The ending x coord relative to the grid of the new group
      * @param {Number} y2 - The ending y coord relative to the grid of the new group
      * @param {Array<Number>} color - The color of the new group
+     * @param {Boolean} onlyPowsOf2 - Whether or not to only use powers of base 2 as the group size
      */
-    addGroup(x1, y1, x2, y2, color = [255, 255, 255]) {
+    addGroup(x1, y1, x2, y2, color = [255, 255, 255], onlyPowsOf2 = true) {
         this.groups.push(
-            this.getAsGroup(x1, y1, x2, y2, color)
+            this.getAsGroup(x1, y1, x2, y2, color, onlyPowsOf2)
         );
         return this.groups[this.groups.length - 1];
     }
