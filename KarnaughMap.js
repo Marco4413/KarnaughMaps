@@ -26,12 +26,13 @@ export class KarnaughMap {
     }
 
     /**
+     * Used to change variable count and their names
      * @param {Number} count - The new ammount of variables [2; 4]
      * @param {Array<String>} names - The names of the variables (4 must be specified)
-     * @param {Array<String>} binaryValues - The values the variables can take (Keep undefined)
      * @param {Boolean} resetGroups - Whether or not to empty the groups array (Should always be true)
      */
-    changeVariables(count, names = [ "A", "B", "C", "D" ], binaryValues = [ "00", "01", "11", "10" ], resetGroups = true) {
+    changeVariables(count, names = [ "A", "B", "C", "D" ], resetGroups = true) {
+        const binaryValues = [ "00", "01", "11", "10" ]
         let xVarCount = 0;
         let yVarCount = 0;
 
@@ -78,6 +79,7 @@ export class KarnaughMap {
     }
 
     /**
+     * Switches between 0 and 1 the value at x, y
      * @param {Number} x - The x coord on the grid of the value to cycle between 0 and 1
      * @param {Number} y - The y coord on the grid of the value to cycle between 0 and 1
      */
@@ -89,6 +91,7 @@ export class KarnaughMap {
     }
 
     /**
+     * Returns the size of the map's grid
      * @returns {UMath.Vec2} The size of the map's grid
      */
     getSize() {
@@ -96,6 +99,7 @@ export class KarnaughMap {
     }
 
     /**
+     * Gets a global pos on the canvas and returns the same one relative to the grid
      * @param {Number} x - A global x coord on the canvas
      * @param {Number} y - A global y coord on the canvas
      * @returns {UMath.Vec2} The pos of a specific cell relative to the grid
@@ -118,12 +122,14 @@ export class KarnaughMap {
     }
 
     /**
+     * Takes 2 pos and a color and returns them as a group that can be added to this.groups
      * @param {Number} x1 - The starting x coord relative to the grid of the new group
      * @param {Number} y1 - The starting y coord relative to the grid of the new group
      * @param {Number} x2 - The ending x coord relative to the grid of the new group
      * @param {Number} y2 - The ending y coord relative to the grid of the new group
      * @param {Array<Number>} color - The color of the new group
      * @param {Boolean} onlyPowsOf2 - Whether or not to only use powers of base 2 as the group size
+     * @returns {[Number, Number, Number, Number, [Number, Number, Number]]} The newly created group
      */
     getAsGroup(x1, y1, x2, y2, color = [255, 255, 255], onlyPowsOf2 = true) {
         const gridSize = this.getSize();
@@ -142,12 +148,14 @@ export class KarnaughMap {
     }
 
     /**
+     * Takes 2 pos and a color and adds them to this.groups
      * @param {Number} x1 - The starting x coord relative to the grid of the new group
      * @param {Number} y1 - The starting y coord relative to the grid of the new group
      * @param {Number} x2 - The ending x coord relative to the grid of the new group
      * @param {Number} y2 - The ending y coord relative to the grid of the new group
      * @param {Array<Number>} color - The color of the new group
      * @param {Boolean} onlyPowsOf2 - Whether or not to only use powers of base 2 as the group size
+     * @returns {[Number, Number, Number, Number, [Number, Number, Number]]} The newly added group
      */
     addGroup(x1, y1, x2, y2, color = [255, 255, 255], onlyPowsOf2 = true) {
         this.groups.push(
@@ -157,10 +165,11 @@ export class KarnaughMap {
     }
 
     /**
+     * Draws the specified group on the specified canvas
      * @param {wCanvas} canvas - The canvas to draw the group on
      * @param {[Number, Number, Number, Number, Array<Number>]} group - The group to draw
      */
-    drawRect(canvas, group) {
+    drawGroup(canvas, group) {
 
         let [x, y, w, h, color] = group;
         
@@ -212,6 +221,7 @@ export class KarnaughMap {
     }
 
     /**
+     * Draws the whole map on the specified canvas
      * @param {wCanvas} canvas - The canvas to draw the map on
      */
     draw(canvas) {
@@ -268,7 +278,7 @@ export class KarnaughMap {
         }
 
         this.groups.forEach(
-            group => this.drawRect(canvas, group)
+            group => this.drawGroup(canvas, group)
         );
     }
 
