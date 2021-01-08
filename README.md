@@ -5,6 +5,6 @@ It was made using my own library to make canvas interactions easier! You can che
 
 ## What are the keys to use this?
 
-**Selecting**: Click and drag within the grid;
-**Changing Value**: Hold CTRL and click on a grid cell;
-**Confirm Current Selection**: Space Bar.
+ - **Selecting**: Click and drag within the grid;
+ - **Changing Value**: Hold CTRL and click on a grid cell;
+ - **Confirm Current Selection**: Space Bar.
