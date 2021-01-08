@@ -65,9 +65,16 @@ window.addEventListener("load", () => {
         a.click();
     }
 
-    window.changeVarCount = (newCount) => {
-        window.km.changeVariables(newCount);
-        onResize(mainCanvas);
+    window.changeVarCount = (count) => {
+        count = Number(count);
+
+        if (!Number.isNaN(count)) {
+            window.km.changeVariables(count);
+            onResize(mainCanvas);
+            return true;
+        }
+
+        return false;
     }
 });
 

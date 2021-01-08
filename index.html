@@ -19,6 +19,7 @@
         }
 
         .menu {
+            padding: 10px;
             position: absolute;
         }
 
@@ -27,6 +28,7 @@
 <body>
     <div class="menu">
         <button onclick="saveImage()">Save Canvas</button>
+        <input type="text" placeholder="Variable Count" onchange="if (!changeVarCount(this.value)) { this.value = ''; }">
     </div>
 </body>
 </html>
