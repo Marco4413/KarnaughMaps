@@ -37,6 +37,9 @@ window.addEventListener("load", () => {
         canvas.canvas.width = window.innerWidth - 1;
         canvas.canvas.height = window.innerHeight - 1;
 
+        const scale = Math.min(window.innerWidth, window.innerHeight) / 820;
+        window.km.cellSize = scale * 128;
+
         const gridSize = window.km.getSize().add(1);
         window.km.pos.x = (canvas.canvas.width - gridSize.x * window.km.cellSize) / 2;
         window.km.pos.y = (canvas.canvas.height - gridSize.y * window.km.cellSize) / 2;
@@ -72,17 +75,33 @@ window.addEventListener("load", () => {
         a.click();
     }
 
-    window.changeVarCount = (count) => {
-        count = Number(count);
-
-        if (!Number.isNaN(count)) {
-            window.km.changeVariables(count);
-            window.km.addGroup(0, 0, 0, 0, currentColor.slice());
-            onResize(mainCanvas);
-            return true;
+    window.changeVariables = (count, variableNames = [ "A", "B", "C", "D" ]) => {
+        if (count === undefined) {
+            count = Math.log2(window.km.firstRow.length - 1) + Math.log2(window.km.firstCol.length - 1);
         }
 
-        return false;
+        window.km.changeVariables(count, variableNames);
+        window.km.addGroup(0, 0, 0, 0, currentColor.slice());
+        onResize(mainCanvas);
+    }
+
+    window.resetGroups = () => {
+        window.km.groups = [];
+        window.km.addGroup(0, 0, 0, 0, currentColor.slice());
+    }
+
+    window.updateVariables = () => {
+        const varCount = document.getElementById("varCount");
+        const varNames = document.getElementById("varNames");
+
+        let count = Number(varCount.value);
+        if (Number.isNaN(count)) {
+            varCount.value = "";
+            count = undefined;
+        }
+
+        const names = varNames.value.replace(/\s+/g, "").split(",");
+        window.changeVariables(count, names.join("").length > 0 ? names : undefined);
     }
 });
 

@@ -12,6 +12,8 @@
             margin: 0px;
             padding: 0px;
             overflow: hidden;
+            font-family: "Consolas", Arial, Helvetica, sans-serif;
+            font-size: 20px;
         }
 
         body {
@@ -19,16 +21,33 @@
         }
 
         .menu {
-            padding: 10px;
+            overflow: visible;
+            width: 20%;
+            height: 50%;
             position: absolute;
+        }
+
+        .guiElement {
+            box-sizing: border-box;
+            margin: 5px;
+            width: 100%;
+            background: black;
+            color: white;
+            border: solid;
+            border-color: white;
+            border-radius: 5px;
+            border-width: 2px;
+            text-align: center;
         }
 
     </style>
 </head>
 <body>
     <div class="menu">
-        <button onclick="saveImage()">Save Canvas</button>
-        <input type="text" placeholder="Variable Count" onchange="if (!changeVarCount(this.value)) { this.value = ''; }">
+        <button class="guiElement" onclick="saveImage()">Save Canvas</button>
+        <button class="guiElement" onclick="resetGroups()">Reset Groups</button>
+        <input class="guiElement" id="varCount" type="text" placeholder="Variable Count" onchange="updateVariables()">
+        <input class="guiElement" id="varNames" type="text" placeholder="Vars' Names (Separated by ',')" onchange="updateVariables()">
     </div>
 </body>
 </html>
