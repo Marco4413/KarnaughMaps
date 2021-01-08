@@ -8,7 +8,7 @@ let selStart = new UMath.Vec2();
 let selEnd = new UMath.Vec2();
 let currentColor = [ 255, 0, 0 ];
 
-window.km = new KarnaughMap(200, 200, 128);
+window.km = new KarnaughMap(0, 0, 128);
 window.km.addGroup(0, 0, 0, 0, currentColor.slice());
 
 /**
@@ -29,15 +29,17 @@ function draw(canvas, deltaTime) {
 }
 
 window.addEventListener("load", () => {
-    new wCanvas({
-        "onResize": canvas => {
-            canvas.canvas.width = window.innerWidth - 1;
-            canvas.canvas.height = window.innerHeight - 1;
+    const onResize = canvas => {
+        canvas.canvas.width = window.innerWidth - 1;
+        canvas.canvas.height = window.innerHeight - 1;
 
-            const gridSize = window.km.getSize().add(1);
-            window.km.pos.x = (canvas.canvas.width - gridSize.x * window.km.cellSize) / 2;
-            window.km.pos.y = (canvas.canvas.height - gridSize.y * window.km.cellSize) / 2;
-        },
+        const gridSize = window.km.getSize().add(1);
+        window.km.pos.x = (canvas.canvas.width - gridSize.x * window.km.cellSize) / 2;
+        window.km.pos.y = (canvas.canvas.height - gridSize.y * window.km.cellSize) / 2;
+    }
+
+    const mainCanvas = new wCanvas({
+        "onResize": onResize,
         "onDraw": draw
     });
 
@@ -61,6 +63,11 @@ window.addEventListener("load", () => {
         a.href = offscreenCanvas.canvas.toDataURL("image/png");
         a.download = "Karnaugh Map";
         a.click();
+    }
+
+    window.changeVarCount = (newCount) => {
+        window.km.changeVariables(newCount);
+        onResize(mainCanvas);
     }
 });
 
