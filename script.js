@@ -8,6 +8,10 @@ let selStart = new UMath.Vec2();
 let selEnd = new UMath.Vec2();
 let currentColor = [ 255, 0, 0 ];
 
+const saveTheme = {
+    "fill": [0, 0, 0],
+    "stroke": [0, 0, 0]
+};
 window.km = new KarnaughMap(0, 0, 128);
 window.km.addGroup(0, 0, 0, 0, currentColor.slice());
 
@@ -54,8 +58,11 @@ window.addEventListener("load", () => {
 
         // Moving the map to 0,0 and drawing it on the offscreen canvas
         const oldPos = window.km.pos.copy();
+        const oldTheme = window.km.colors;
         window.km.pos = new UMath.Vec2();
+        window.km.colors = saveTheme;
         window.km.draw(offscreenCanvas);
+        window.km.colors = oldTheme;
         window.km.pos = oldPos;
 
         // Creating href and opening it
@@ -70,6 +77,7 @@ window.addEventListener("load", () => {
 
         if (!Number.isNaN(count)) {
             window.km.changeVariables(count);
+            window.km.addGroup(0, 0, 0, 0, currentColor.slice());
             onResize(mainCanvas);
             return true;
         }
@@ -79,15 +87,21 @@ window.addEventListener("load", () => {
 });
 
 window.addEventListener("mousedown", ev => {
-    if (ev.ctrlKey) {
-        const cellPos = window.km.globalPosToGridCell(ev.x, ev.y);
-        window.km.cycleValue(cellPos.x, cellPos.y);
-    } else {
-        selecting = true;
-        selStart.x = ev.x;
-        selStart.y = ev.y;
-        selEnd.x = ev.x;
-        selEnd.y = ev.y;
+    const kmSize = window.km.getSize().mul(window.km.cellSize);
+    if (
+        ev.x >= window.km.cellSize + window.km.pos.x && ev.y >= window.km.cellSize + window.km.pos.y &&
+        ev.x < window.km.pos.x + kmSize.x + window.km.cellSize && ev.y < window.km.pos.y + kmSize.y + window.km.cellSize
+    ) {
+        if (ev.ctrlKey) {
+            const cellPos = window.km.globalPosToGridCell(ev.x, ev.y);
+            window.km.cycleValue(cellPos.x, cellPos.y);
+        } else {
+            selecting = true;
+            selStart.x = ev.x;
+            selStart.y = ev.y;
+            selEnd.x = ev.x;
+            selEnd.y = ev.y;
+        }
     }
 });
 
@@ -108,6 +122,10 @@ window.addEventListener("keydown", ev => {
         const gridSelEnd = window.km.globalPosToGridCell(selEnd.x, selEnd.y);
         window.km.addGroup(gridSelStart.x, gridSelStart.y, gridSelEnd.x, gridSelEnd.y, currentColor.slice());
         
-        currentColor = [Math.random() * 255, Math.random() * 255, Math.random() * 255];
+        currentColor = [
+            UMath.map(Math.random(), 0, 1, 25, 230),
+            UMath.map(Math.random(), 0, 1, 25, 230),
+            UMath.map(Math.random(), 0, 1, 25, 230)
+        ];
     }
 });
