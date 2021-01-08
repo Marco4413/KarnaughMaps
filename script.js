@@ -28,14 +28,53 @@ function draw(canvas, deltaTime) {
     }
 }
 
-window.addEventListener("load", () => new wCanvas({ "onDraw": draw }));
+window.addEventListener("load", () => {
+    new wCanvas({
+        "onResize": canvas => {
+            canvas.canvas.width = window.innerWidth - 1;
+            canvas.canvas.height = window.innerHeight - 1;
+
+            const gridSize = window.km.getSize().add(1);
+            window.km.pos.x = (canvas.canvas.width - gridSize.x * window.km.cellSize) / 2;
+            window.km.pos.y = (canvas.canvas.height - gridSize.y * window.km.cellSize) / 2;
+        },
+        "onDraw": draw
+    });
+
+    const offscreenCanvas = new wCanvas({
+        "canvas": document.createElement("canvas")
+    });
+    window.saveImage = () => {
+        // Setting the offscreen canvas's size to the size of the map
+        const gridSize = window.km.getSize().add(1);
+        offscreenCanvas.canvas.width = gridSize.x * window.km.cellSize;
+        offscreenCanvas.canvas.height = gridSize.y * window.km.cellSize;
+
+        // Moving the map to 0,0 and drawing it on the offscreen canvas
+        const oldPos = window.km.pos.copy();
+        window.km.pos = new UMath.Vec2();
+        window.km.draw(offscreenCanvas);
+        window.km.pos = oldPos;
+
+        // Creating href and opening it
+        const a = document.createElement("a");
+        a.href = offscreenCanvas.canvas.toDataURL("image/png");
+        a.download = "Karnaugh Map";
+        a.click();
+    }
+});
 
 window.addEventListener("mousedown", ev => {
-    selecting = true;
-    selStart.x = ev.x;
-    selStart.y = ev.y;
-    selEnd.x = ev.x;
-    selEnd.y = ev.y;
+    if (ev.ctrlKey) {
+        const cellPos = window.km.globalPosToGridCell(ev.x, ev.y);
+        window.km.cycleValue(cellPos.x, cellPos.y);
+    } else {
+        selecting = true;
+        selStart.x = ev.x;
+        selStart.y = ev.y;
+        selEnd.x = ev.x;
+        selEnd.y = ev.y;
+    }
 });
 
 window.addEventListener("mouseup", () => selecting = false);
