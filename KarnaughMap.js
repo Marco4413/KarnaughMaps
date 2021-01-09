@@ -140,8 +140,8 @@ export class KarnaughMap {
         ).add(1);
 
         if (onlyPowsOf2) {
-            size.x = Math.pow(2, Math.floor(Math.log2(size.x)));
-            size.y = Math.pow(2, Math.floor(Math.log2(size.y)));
+            size.x = Math.pow(2, Math.round(Math.log2(size.x)));
+            size.y = Math.pow(2, Math.round(Math.log2(size.y)));
         }
 
         return [ x1, y1, size.x, size.y, color ];
