@@ -117,7 +117,7 @@ window.addEventListener("load", () => {
         window.km.pos = UMath.Vec2.add({ "x": 0, "y": 0 }, SAVE_BORDER_WIDTH);
         window.km.style = SAVE_STYLE;
         window.km.draw(offscreenCanvas);
-        window.km.colors = MAP_STYLE;
+        window.km.style = MAP_STYLE;
         window.km.pos = oldPos;
 
         // Creating href and opening it
