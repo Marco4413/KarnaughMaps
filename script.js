@@ -3,17 +3,40 @@ import { wCanvas, UMath } from "./wCanvas/wcanvas.js";
 
 import { KarnaughMap } from "./KarnaughMap.js";
 
+const SAVE_BORDER_WIDTH = 10;
+const SAVE_COLORS = {
+    "fill": [0, 0, 0],
+    "stroke": [0, 0, 0]
+};
+
 let selecting = false;
 let selStart = new UMath.Vec2();
 let selEnd = new UMath.Vec2();
 let currentColor = [ 255, 0, 0 ];
 
-const saveTheme = {
-    "fill": [0, 0, 0],
-    "stroke": [0, 0, 0]
-};
 window.km = new KarnaughMap(0, 0, 128);
-window.km.addGroup(0, 0, 0, 0, currentColor.slice());
+
+/**
+ * @param {[Number, Number, Number]} color
+ */
+function selToGroup(color) {
+
+    const gridSelStart = window.km.globalPosToGridCell(
+        Math.min(selStart.x, selEnd.x),
+        Math.min(selStart.y, selEnd.y)
+    );
+
+    const gridSelEnd = window.km.globalPosToGridCell(
+        Math.max(selStart.x, selEnd.x),
+        Math.max(selStart.y, selEnd.y)
+    );
+
+    return window.km.getAsGroup(
+        gridSelStart.x, gridSelStart.y, gridSelEnd.x, gridSelEnd.y,
+        color === undefined ? currentColor.slice() : color.slice()
+    );
+    
+}
 
 /**
  * @param {wCanvas} canvas
@@ -25,10 +48,7 @@ function draw(canvas, deltaTime) {
     window.km.draw(canvas);
 
     if (selecting) {
-        const gridSelStart = window.km.globalPosToGridCell(selStart.x, selStart.y);
-        const gridSelEnd = window.km.globalPosToGridCell(selEnd.x, selEnd.y);
-
-        window.km.groups[window.km.groups.length - 1] = window.km.getAsGroup(gridSelStart.x, gridSelStart.y, gridSelEnd.x, gridSelEnd.y, currentColor.slice());
+        window.km.drawGroup(canvas, selToGroup([ 255, 255, 255 ]));
     }
 }
 
@@ -56,14 +76,15 @@ window.addEventListener("load", () => {
     window.saveImage = () => {
         // Setting the offscreen canvas's size to the size of the map
         const gridSize = window.km.getSize().add(1);
-        offscreenCanvas.canvas.width = gridSize.x * window.km.cellSize;
-        offscreenCanvas.canvas.height = gridSize.y * window.km.cellSize;
+        offscreenCanvas.canvas.width = gridSize.x * window.km.cellSize + SAVE_BORDER_WIDTH * 2;
+        offscreenCanvas.canvas.height = gridSize.y * window.km.cellSize + SAVE_BORDER_WIDTH * 2;
+        offscreenCanvas.clear();
 
         // Moving the map to 0,0 and drawing it on the offscreen canvas
         const oldPos = window.km.pos.copy();
         const oldTheme = window.km.colors;
-        window.km.pos = new UMath.Vec2();
-        window.km.colors = saveTheme;
+        window.km.pos = UMath.Vec2.add({ "x": 0, "y": 0 }, SAVE_BORDER_WIDTH);
+        window.km.colors = SAVE_COLORS;
         window.km.draw(offscreenCanvas);
         window.km.colors = oldTheme;
         window.km.pos = oldPos;
@@ -81,13 +102,11 @@ window.addEventListener("load", () => {
         }
 
         window.km.changeVariables(count, variableNames);
-        window.km.addGroup(0, 0, 0, 0, currentColor.slice());
         onResize(mainCanvas);
     }
 
     window.resetGroups = () => {
         window.km.groups = [];
-        window.km.addGroup(0, 0, 0, 0, currentColor.slice());
     }
 
     window.updateVariables = () => {
@@ -137,9 +156,7 @@ window.addEventListener("keydown", ev => {
     if (ev.key === " ") {
         selecting = false;
 
-        const gridSelStart = window.km.globalPosToGridCell(selStart.x, selStart.y);
-        const gridSelEnd = window.km.globalPosToGridCell(selEnd.x, selEnd.y);
-        window.km.addGroup(gridSelStart.x, gridSelStart.y, gridSelEnd.x, gridSelEnd.y, currentColor.slice());
+        window.km.groups.push(selToGroup());
         
         currentColor = [
             UMath.map(Math.random(), 0, 1, 25, 230),
