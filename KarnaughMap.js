@@ -12,9 +12,22 @@ export class KarnaughMap {
      */
     constructor(x, y, cellSize = 16, variableCount = 4) {
 
-        this.colors = {
-            "fill": [255, 255, 255],
-            "stroke": [255, 255, 255]
+        this.style = {
+            "outlines": {
+                "color": [255, 255, 255],
+                "width": 2
+            },
+            "text": {
+                "color": [255, 255, 255],
+                "scale": 0.33
+            },
+            "values": {
+                "color": [255, 255, 255],
+                "scale": 0.5
+            },
+            "groups": {
+                "borderWidth": 4
+            }
         };
 
         this.pos = new UMath.Vec2(x, y);
@@ -174,7 +187,7 @@ export class KarnaughMap {
         let [x, y, w, h, color] = group;
         
         canvas.stroke(...color);
-        canvas.strokeWeigth(4);
+        canvas.strokeWeigth(this.style.groups.borderWidth);
         const maxSize = this.getSize();
 
         w = UMath.constrain(w, 1, maxSize.x);
@@ -225,12 +238,13 @@ export class KarnaughMap {
      * @param {wCanvas} canvas - The canvas to draw the map on
      */
     draw(canvas) {
-        canvas.fill(...this.colors.fill);
-        canvas.stroke(...this.colors.stroke);
+        canvas.fill(...this.style.text.color);
+        canvas.stroke(...this.style.outlines.color);
+        canvas.strokeWeigth(this.style.outlines.width);
 
         canvas.line(this.pos.x, this.pos.y, this.pos.x + this.cellSize, this.pos.y + this.cellSize);
 
-        canvas.textSize(this.cellSize * 0.33);
+        canvas.textSize(this.cellSize * this.style.text.scale);
 
         const gridSize = this.getSize();
 
@@ -265,7 +279,8 @@ export class KarnaughMap {
 
         }
 
-        canvas.textSize(window.cellSize * 0.5);
+        canvas.fill(...this.style.values.color);
+        canvas.textSize(window.cellSize * this.style.values.scale);
         for (let y = 0; y < Math.min(this.values.length, gridSize.y); y++) {
             const row = this.values[y];
             for (let x = 0; x < Math.min(row.length, gridSize.x); x++) {

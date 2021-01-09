@@ -4,9 +4,40 @@ import { wCanvas, UMath } from "./wCanvas/wcanvas.js";
 import { KarnaughMap } from "./KarnaughMap.js";
 
 const SAVE_BORDER_WIDTH = 10;
-const SAVE_COLORS = {
-    "fill": [0, 0, 0],
-    "stroke": [0, 0, 0]
+const SAVE_STYLE = {
+    "outlines": {
+        "color": [0, 0, 0],
+        "width": 2
+    },
+    "text": {
+        "color": [0, 0, 0],
+        "scale": 0.33
+    },
+    "values": {
+        "color": [0, 0, 0],
+        "scale": 0.5
+    },
+    "groups": {
+        "borderWidth": 4
+    }
+};
+
+const MAP_STYLE = {
+    "outlines": {
+        "color": [255, 255, 255],
+        "width": 2
+    },
+    "text": {
+        "color": [255, 255, 255],
+        "scale": 0.33
+    },
+    "values": {
+        "color": [255, 255, 255],
+        "scale": 0.5
+    },
+    "groups": {
+        "borderWidth": 4
+    }
 };
 
 let selecting = false;
@@ -15,6 +46,7 @@ let selEnd = new UMath.Vec2();
 let currentColor = [ 255, 0, 0 ];
 
 window.km = new KarnaughMap(0, 0, 128);
+window.km.style = MAP_STYLE;
 
 /**
  * @param {[Number, Number, Number]} color
@@ -82,11 +114,10 @@ window.addEventListener("load", () => {
 
         // Moving the map to 0,0 and drawing it on the offscreen canvas
         const oldPos = window.km.pos.copy();
-        const oldTheme = window.km.colors;
         window.km.pos = UMath.Vec2.add({ "x": 0, "y": 0 }, SAVE_BORDER_WIDTH);
-        window.km.colors = SAVE_COLORS;
+        window.km.style = SAVE_STYLE;
         window.km.draw(offscreenCanvas);
-        window.km.colors = oldTheme;
+        window.km.colors = MAP_STYLE;
         window.km.pos = oldPos;
 
         // Creating href and opening it
