@@ -248,11 +248,19 @@ export class KarnaughMap {
 
         const gridSize = this.getSize();
 
+        const outerTextScale = this.cellSize * this.style.text.scale;
         for (let i = 0; i < this.firstRow.length; i++) {
 
+            canvas.textSize(outerTextScale);
             const x = this.pos.x + i * this.cellSize;
 
-            if (i > 0) {
+            if (i === 0) {
+                const width = canvas.context.measureText(this.firstCol[i]).width;
+
+                if (width > this.cellSize / 2) {
+                    canvas.textSize(outerTextScale * this.cellSize / 2 / width);
+                }
+            } else {
                 canvas.line(x, this.pos.y, x, this.pos.y + this.cellSize * this.firstCol.length);
             }
 
@@ -265,9 +273,16 @@ export class KarnaughMap {
 
         for (let i = 0; i < this.firstCol.length; i++) {
 
+            canvas.textSize(outerTextScale);
             const y = this.pos.y + i * this.cellSize;
 
-            if (i > 0) {
+            if (i === 0) {
+                const width = canvas.context.measureText(this.firstCol[i]).width;
+
+                if (width > this.cellSize / 2) {
+                    canvas.textSize(outerTextScale * this.cellSize / 2 / width);
+                }
+            } else {
                 canvas.line(this.pos.x, y, this.pos.x + this.cellSize * this.firstRow.length, y);
             }
 
