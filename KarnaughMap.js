@@ -21,7 +21,7 @@ export class KarnaughMap {
                 "color": [255, 255, 255],
                 "scale": 0.33
             },
-            "values": {
+            "outValues": {
                 "color": [255, 255, 255],
                 "scale": 0.5
             },
@@ -34,8 +34,77 @@ export class KarnaughMap {
         this.cellSize = cellSize;
         this.groups = [];
 
+        this.varNames = [ "A", "B", "C", "D" ];
+
         this.changeVariables(variableCount);
 
+    }
+
+    /**
+     * The count of variables on the x and y axis
+     * @returns {UMath.Vec2} The count of variables on the x and y axis
+     */
+    getXYVarCount() {
+        switch (this.varCount) {
+            case 2: {
+                return new UMath.Vec2(1, 1);
+            }
+            case 3: {
+                return new UMath.Vec2(2, 1);
+            }
+            default: {
+                return new UMath.Vec2(2, 2);
+            }
+        }
+    }
+
+    /**
+     * Returns the size of the map's grid
+     * @returns {UMath.Vec2} The size of the map's grid
+     */
+    getSize() {
+        const varCount = this.getXYVarCount();
+        return new UMath.Vec2(
+            Math.pow(2, varCount.x),
+            Math.pow(2, varCount.y)
+        );
+    }
+
+    /**
+     * Returns all groups of variables (e.g. ["AB", "CD"])
+     * @returns {[String, String]} The two groups of variables
+     */
+    getVarGroups() {
+        const varCount = this.getXYVarCount();
+        return [ this.varNames.slice(0, varCount.x).join(""), this.varNames.slice(varCount.x, varCount.x + varCount.y).join("") ];
+    }
+
+    /**
+     * Returns all the values that the variables can assume
+     * @returns {{ x: Array<String>, y: Array<String> }} The values that the variables can assume
+     */
+    getVarValues() {
+        const varValues = {
+            "x": [],
+            "y": []
+        };
+        
+        const binaryValues = [ "00", "01", "11", "10" ];
+
+        const varCount = this.getXYVarCount();
+        const possibleValues = new UMath.Vec2(
+            Math.pow(2, varCount.x),
+            Math.pow(2, varCount.y)
+        );
+
+        for (let i = 0; i < possibleValues.x; i++) {
+            varValues.x.push(binaryValues[i].substr(-varCount.x));
+        }
+        for (let i = 0; i < possibleValues.y; i++) {
+            varValues.y.push(binaryValues[i].substr(-varCount.y));
+        }
+
+        return varValues;
     }
 
     /**
@@ -45,44 +114,16 @@ export class KarnaughMap {
      * @param {Boolean} resetGroups - Whether or not to empty the groups array (Should always be true)
      */
     changeVariables(count, names = [ "A", "B", "C", "D" ], resetGroups = true) {
-        const binaryValues = [ "00", "01", "11", "10" ]
-        let xVarCount = 0;
-        let yVarCount = 0;
+        this.varCount = count;
+        this.varNames = names;
 
-        switch (count) {
-            case 2: {
-                xVarCount = 1;
-                yVarCount = 1;
-                break;
-            }
-            case 3: {
-                xVarCount = 2;
-                yVarCount = 1;
-                break;
-            }
-            default: {
-                xVarCount = 2;
-                yVarCount = 2;
-            }
-        }
+        const size = this.getSize();
 
-        this.firstRow = [ names.slice(0, xVarCount).join("") ];
-        this.firstCol = [ names.slice(xVarCount, xVarCount + yVarCount).join("") ];
-
-        const cols = Math.pow(2, xVarCount);
-        const rows = Math.pow(2, yVarCount);
-        for (let i = 0; i < cols; i++) {
-            this.firstRow.push(binaryValues[i].substr(-xVarCount));
-        }
-        for (let i = 0; i < rows; i++) {
-            this.firstCol.push(binaryValues[i].substr(-yVarCount));
-        }
-
-        this.values = [];
-        for (let y = 0; y < rows; y++) {
-            this.values[y] = [];
-            for (let x = 0; x < cols; x++) {
-                this.values[y][x] = 0;
+        this.outValues = [];
+        for (let y = 0; y < size.y; y++) {
+            this.outValues[y] = [];
+            for (let x = 0; x < size.x; x++) {
+                this.outValues[y][x] = 0;
             }
         }
 
@@ -92,23 +133,15 @@ export class KarnaughMap {
     }
 
     /**
-     * Switches between 0 and 1 the value at x, y
-     * @param {Number} x - The x coord on the grid of the value to cycle between 0 and 1
-     * @param {Number} y - The y coord on the grid of the value to cycle between 0 and 1
+     * Switches between 0 and 1 the out value at x, y
+     * @param {Number} x - The x coord on the grid of the out value to cycle between 0 and 1
+     * @param {Number} y - The y coord on the grid of the out value to cycle between 0 and 1
      */
-    cycleValue(x, y) {
-        if (this.values[y] === undefined) { return; }
-        if (this.values[y][x] === undefined) { return; }
+    toggleOut(x, y) {
+        if (this.outValues[y] === undefined) { return; }
+        if (this.outValues[y][x] === undefined) { return; }
 
-        this.values[y][x] = (this.values[y][x] + 1) % 2;
-    }
-
-    /**
-     * Returns the size of the map's grid
-     * @returns {UMath.Vec2} The size of the map's grid
-     */
-    getSize() {
-        return new UMath.Vec2(this.firstRow.length - 1, this.firstCol.length - 1);
+        this.outValues[y][x] = (this.outValues[y][x] + 1) % 2;
     }
 
     /**
@@ -244,60 +277,55 @@ export class KarnaughMap {
 
         canvas.line(this.pos.x, this.pos.y, this.pos.x + this.cellSize, this.pos.y + this.cellSize);
 
-        canvas.textSize(this.cellSize * this.style.text.scale);
+        const textScale = this.cellSize * this.style.text.scale;
+        canvas.textSize(textScale);
 
         const gridSize = this.getSize();
 
-        const outerTextScale = this.cellSize * this.style.text.scale;
-        for (let i = 0; i < this.firstRow.length; i++) {
+        {
+            const [ xGroup, yGroup ] = this.getVarGroups();
 
-            canvas.textSize(outerTextScale);
-            const x = this.pos.x + i * this.cellSize;
-
-            if (i === 0) {
-                const width = canvas.context.measureText(this.firstCol[i]).width;
-
-                if (width > this.cellSize / 2) {
-                    canvas.textSize(outerTextScale * this.cellSize / 2 / width);
-                }
-            } else {
-                canvas.line(x, this.pos.y, x, this.pos.y + this.cellSize * this.firstCol.length);
-            }
+            const maxWidth = Math.max(canvas.context.measureText(xGroup).width, canvas.context.measureText(yGroup).width);
+            const rescale = maxWidth > this.cellSize / 2 ? (this.cellSize / 2) / maxWidth : 1;
+            canvas.textSize(textScale * rescale);
 
             canvas.text(
-                this.firstRow[i], x + this.cellSize / 2, this.pos.y + this.cellSize / 2,
-                { "alignment": i === 0 ? { "horizontal": "left", "vertical": "bottom" } : { "horizontal": "center", "vertical": "center" } }
+                xGroup, this.pos.x + this.cellSize / 2, this.pos.y + this.cellSize / 2,
+                { "alignment": { "horizontal": "left", "vertical": "bottom" } }
             );
-
-        }
-
-        for (let i = 0; i < this.firstCol.length; i++) {
-
-            canvas.textSize(outerTextScale);
-            const y = this.pos.y + i * this.cellSize;
-
-            if (i === 0) {
-                const width = canvas.context.measureText(this.firstCol[i]).width;
-
-                if (width > this.cellSize / 2) {
-                    canvas.textSize(outerTextScale * this.cellSize / 2 / width);
-                }
-            } else {
-                canvas.line(this.pos.x, y, this.pos.x + this.cellSize * this.firstRow.length, y);
-            }
 
             canvas.text(
-                this.firstCol[i],
-                this.pos.x + this.cellSize / 2, y + this.cellSize / 2,
-                { "alignment": i === 0 ? { "horizontal": "right", "vertical": "top" } : { "horizontal": "center", "vertical": "center" } }
+                yGroup, this.pos.x + this.cellSize / 2, this.pos.y + this.cellSize / 2,
+                { "alignment": { "horizontal": "right", "vertical": "top" } }
             );
-
         }
 
-        canvas.fill(...this.style.values.color);
-        canvas.textSize(window.cellSize * this.style.values.scale);
-        for (let y = 0; y < Math.min(this.values.length, gridSize.y); y++) {
-            const row = this.values[y];
+        canvas.textSize(textScale);
+        const varValues = this.getVarValues();
+        for (let i = 0; i < varValues.x.length; i++) {
+            const x = this.pos.x + this.cellSize * (i + 1);
+            canvas.line(x, this.pos.y, x, this.pos.y + this.cellSize * (gridSize.y + 1));
+
+            canvas.text(
+                varValues.x[i], x + this.cellSize / 2, this.pos.y + this.cellSize / 2,
+                { "alignment": { "horizontal": "center", "vertical": "center" } }
+            );
+        }
+
+        for (let i = 0; i < varValues.y.length; i++) {
+            const y = this.pos.y + this.cellSize * (i + 1);
+            canvas.line(this.pos.x, y, this.pos.x + this.cellSize * (gridSize.x + 1), y);
+
+            canvas.text(
+                varValues.y[i], this.pos.x + this.cellSize / 2, y + this.cellSize / 2,
+                { "alignment": { "horizontal": "center", "vertical": "center" } }
+            );
+        }
+
+        canvas.fill(...this.style.outValues.color);
+        canvas.textSize(window.cellSize * this.style.outValues.scale);
+        for (let y = 0; y < Math.min(this.outValues.length, gridSize.y); y++) {
+            const row = this.outValues[y];
             for (let x = 0; x < Math.min(row.length, gridSize.x); x++) {
                 canvas.text(
                     row[x],

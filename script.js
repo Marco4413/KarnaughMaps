@@ -13,7 +13,7 @@ const SAVE_STYLE = {
         "color": [0, 0, 0],
         "scale": 0.33
     },
-    "values": {
+    "outValues": {
         "color": [0, 0, 0],
         "scale": 0.5
     },
@@ -31,7 +31,7 @@ const MAP_STYLE = {
         "color": [255, 255, 255],
         "scale": 0.33
     },
-    "values": {
+    "outValues": {
         "color": [255, 255, 255],
         "scale": 0.5
     },
@@ -45,25 +45,26 @@ let selStart = new UMath.Vec2();
 let selEnd = new UMath.Vec2();
 let currentColor = [ 255, 0, 0 ];
 
-window.km = new KarnaughMap(0, 0, 128);
-window.km.style = MAP_STYLE;
+const GLOBAL_MAP = new KarnaughMap(0, 0, 128);
+window.GLOBAL_MAP = GLOBAL_MAP;
+GLOBAL_MAP.style = MAP_STYLE;
 
 /**
  * @param {[Number, Number, Number]} color
  */
 function selToGroup(color) {
 
-    const gridSelStart = window.km.globalPosToGridCell(
+    const gridSelStart = GLOBAL_MAP.globalPosToGridCell(
         Math.min(selStart.x, selEnd.x),
         Math.min(selStart.y, selEnd.y)
     );
 
-    const gridSelEnd = window.km.globalPosToGridCell(
+    const gridSelEnd = GLOBAL_MAP.globalPosToGridCell(
         Math.max(selStart.x, selEnd.x),
         Math.max(selStart.y, selEnd.y)
     );
 
-    return window.km.getAsGroup(
+    return GLOBAL_MAP.getAsGroup(
         gridSelStart.x, gridSelStart.y, gridSelEnd.x, gridSelEnd.y,
         color === undefined ? currentColor.slice() : color.slice()
     );
@@ -77,10 +78,10 @@ function selToGroup(color) {
 function draw(canvas, deltaTime) {
     canvas.clear();
 
-    window.km.draw(canvas);
+    GLOBAL_MAP.draw(canvas);
 
     if (selecting) {
-        window.km.drawGroup(canvas, selToGroup([ 255, 255, 255 ]));
+        GLOBAL_MAP.drawGroup(canvas, selToGroup([ 255, 255, 255 ]));
     }
 }
 
@@ -90,11 +91,11 @@ window.addEventListener("load", () => {
         canvas.canvas.height = window.innerHeight - 1;
 
         const scale = Math.min(window.innerWidth, window.innerHeight) / 820;
-        window.km.cellSize = scale * 128;
+        GLOBAL_MAP.cellSize = scale * 128;
 
-        const gridSize = window.km.getSize().add(1);
-        window.km.pos.x = (canvas.canvas.width - gridSize.x * window.km.cellSize) / 2;
-        window.km.pos.y = (canvas.canvas.height - gridSize.y * window.km.cellSize) / 2;
+        const gridSize = GLOBAL_MAP.getSize().add(1);
+        GLOBAL_MAP.pos.x = (canvas.canvas.width - gridSize.x * GLOBAL_MAP.cellSize) / 2;
+        GLOBAL_MAP.pos.y = (canvas.canvas.height - gridSize.y * GLOBAL_MAP.cellSize) / 2;
     }
 
     const mainCanvas = new wCanvas({
@@ -107,18 +108,18 @@ window.addEventListener("load", () => {
     });
     window.saveImage = () => {
         // Setting the offscreen canvas's size to the size of the map
-        const gridSize = window.km.getSize().add(1);
-        offscreenCanvas.canvas.width = gridSize.x * window.km.cellSize + SAVE_BORDER_WIDTH * 2;
-        offscreenCanvas.canvas.height = gridSize.y * window.km.cellSize + SAVE_BORDER_WIDTH * 2;
+        const gridSize = GLOBAL_MAP.getSize().add(1);
+        offscreenCanvas.canvas.width = gridSize.x * GLOBAL_MAP.cellSize + SAVE_BORDER_WIDTH * 2;
+        offscreenCanvas.canvas.height = gridSize.y * GLOBAL_MAP.cellSize + SAVE_BORDER_WIDTH * 2;
         offscreenCanvas.clear();
 
         // Moving the map to 0,0 and drawing it on the offscreen canvas
-        const oldPos = window.km.pos.copy();
-        window.km.pos = UMath.Vec2.add({ "x": 0, "y": 0 }, SAVE_BORDER_WIDTH);
-        window.km.style = SAVE_STYLE;
-        window.km.draw(offscreenCanvas);
-        window.km.style = MAP_STYLE;
-        window.km.pos = oldPos;
+        const oldPos = GLOBAL_MAP.pos.copy();
+        GLOBAL_MAP.pos = UMath.Vec2.add({ "x": 0, "y": 0 }, SAVE_BORDER_WIDTH);
+        GLOBAL_MAP.style = SAVE_STYLE;
+        GLOBAL_MAP.draw(offscreenCanvas);
+        GLOBAL_MAP.style = MAP_STYLE;
+        GLOBAL_MAP.pos = oldPos;
 
         // Creating href and opening it
         const a = document.createElement("a");
@@ -127,17 +128,13 @@ window.addEventListener("load", () => {
         a.click();
     }
 
-    window.changeVariables = (count, variableNames = [ "A", "B", "C", "D" ]) => {
-        if (count === undefined) {
-            count = Math.log2(window.km.firstRow.length - 1) + Math.log2(window.km.firstCol.length - 1);
-        }
-
-        window.km.changeVariables(count, variableNames);
+    window.changeVariables = (count = GLOBAL_MAP.varCount, variableNames = [ "A", "B", "C", "D" ]) => {
+        GLOBAL_MAP.changeVariables(count, variableNames);
         onResize(mainCanvas);
     }
 
     window.resetGroups = () => {
-        window.km.groups = [];
+        GLOBAL_MAP.groups = [];
     }
 
     window.updateVariables = () => {
@@ -156,14 +153,14 @@ window.addEventListener("load", () => {
 });
 
 window.addEventListener("mousedown", ev => {
-    const kmSize = window.km.getSize().mul(window.km.cellSize);
+    const kmSize = GLOBAL_MAP.getSize().mul(GLOBAL_MAP.cellSize);
     if (
-        ev.x >= window.km.cellSize + window.km.pos.x && ev.y >= window.km.cellSize + window.km.pos.y &&
-        ev.x < window.km.pos.x + kmSize.x + window.km.cellSize && ev.y < window.km.pos.y + kmSize.y + window.km.cellSize
+        ev.x >= GLOBAL_MAP.cellSize + GLOBAL_MAP.pos.x && ev.y >= GLOBAL_MAP.cellSize + GLOBAL_MAP.pos.y &&
+        ev.x < GLOBAL_MAP.pos.x + kmSize.x + GLOBAL_MAP.cellSize && ev.y < GLOBAL_MAP.pos.y + kmSize.y + GLOBAL_MAP.cellSize
     ) {
         if (ev.ctrlKey) {
-            const cellPos = window.km.globalPosToGridCell(ev.x, ev.y);
-            window.km.cycleValue(cellPos.x, cellPos.y);
+            const cellPos = GLOBAL_MAP.globalPosToGridCell(ev.x, ev.y);
+            GLOBAL_MAP.toggleOut(cellPos.x, cellPos.y);
         } else {
             selecting = true;
             selStart.x = ev.x;
@@ -187,7 +184,7 @@ window.addEventListener("keydown", ev => {
     if (ev.key === " ") {
         selecting = false;
 
-        window.km.groups.push(selToGroup());
+        GLOBAL_MAP.groups.push(selToGroup());
         
         currentColor = [
             UMath.map(Math.random(), 0, 1, 25, 230),
