@@ -2,43 +2,12 @@
 import { wCanvas, UMath } from "./wCanvas/wcanvas.js";
 
 import { KarnaughMap } from "./KarnaughMap.js";
+import { MapStyle } from "./MapStyle.js";
 
 const SAVE_BORDER_WIDTH = 10;
-const SAVE_STYLE = {
-    "outlines": {
-        "color": [0, 0, 0],
-        "width": 2
-    },
-    "text": {
-        "color": [0, 0, 0],
-        "scale": 0.33
-    },
-    "outValues": {
-        "color": [0, 0, 0],
-        "scale": 0.5
-    },
-    "groups": {
-        "borderWidth": 4
-    }
-};
+const SAVE_STYLE = new MapStyle([0, 0, 0], 2, [0, 0, 0], 0.33, [0, 0, 0], 0.5, 4);
 
-const MAP_STYLE = {
-    "outlines": {
-        "color": [255, 255, 255],
-        "width": 2
-    },
-    "text": {
-        "color": [255, 255, 255],
-        "scale": 0.33
-    },
-    "outValues": {
-        "color": [255, 255, 255],
-        "scale": 0.5
-    },
-    "groups": {
-        "borderWidth": 4
-    }
-};
+const MAP_STYLE = new MapStyle();
 
 let selecting = false;
 let selStart = new UMath.Vec2();

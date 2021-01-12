@@ -1,5 +1,6 @@
 
 import { wCanvas, UMath } from "./wCanvas/wcanvas.js";
+import { MapStyle } from "./MapStyle.js";
 
 export class KarnaughMap {
 
@@ -12,23 +13,7 @@ export class KarnaughMap {
      */
     constructor(x, y, cellSize = 16, variableCount = 4) {
 
-        this.style = {
-            "outlines": {
-                "color": [255, 255, 255],
-                "width": 2
-            },
-            "text": {
-                "color": [255, 255, 255],
-                "scale": 0.33
-            },
-            "outValues": {
-                "color": [255, 255, 255],
-                "scale": 0.5
-            },
-            "groups": {
-                "borderWidth": 4
-            }
-        };
+        this.style = new MapStyle();
 
         this.pos = new UMath.Vec2(x, y);
         this.cellSize = cellSize;
@@ -272,8 +257,8 @@ export class KarnaughMap {
      */
     draw(canvas) {
         canvas.fill(...this.style.text.color);
-        canvas.stroke(...this.style.outlines.color);
-        canvas.strokeWeigth(this.style.outlines.width);
+        canvas.stroke(...this.style.lines.color);
+        canvas.strokeWeigth(this.style.lines.width);
 
         canvas.line(this.pos.x, this.pos.y, this.pos.x + this.cellSize, this.pos.y + this.cellSize);
 
