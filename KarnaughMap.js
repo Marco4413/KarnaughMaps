@@ -1,6 +1,30 @@
 
 import { wCanvas, UMath } from "./wCanvas/wcanvas.js";
-import { MapStyle } from "./MapStyle.js";
+import { MapStyle, mapStyleToDict } from "./MapStyle.js";
+import { isValidKarnaughMap } from "./validationUtils.js";
+
+/**
+ * @typedef {[Number, Number, Number, Number, [Number, Number, Number]]} Group
+ */
+
+/**
+ * The count of variables on the x and y axis
+ * @param {Number} count - The total number of variables
+ * @returns {UMath.Vec2} The count of variables on the x and y axis
+ */
+export function getXYVarCount(count) {
+    switch (count) {
+        case 2: {
+            return new UMath.Vec2(1, 1);
+        }
+        case 3: {
+            return new UMath.Vec2(2, 1);
+        }
+        default: {
+            return new UMath.Vec2(2, 2);
+        }
+    }
+}
 
 export class KarnaughMap {
 
@@ -26,29 +50,11 @@ export class KarnaughMap {
     }
 
     /**
-     * The count of variables on the x and y axis
-     * @returns {UMath.Vec2} The count of variables on the x and y axis
-     */
-    getXYVarCount() {
-        switch (this.varCount) {
-            case 2: {
-                return new UMath.Vec2(1, 1);
-            }
-            case 3: {
-                return new UMath.Vec2(2, 1);
-            }
-            default: {
-                return new UMath.Vec2(2, 2);
-            }
-        }
-    }
-
-    /**
      * Returns the size of the map's grid
      * @returns {UMath.Vec2} The size of the map's grid
      */
     getSize() {
-        const varCount = this.getXYVarCount();
+        const varCount = getXYVarCount(this.varCount);
         return new UMath.Vec2(
             Math.pow(2, varCount.x),
             Math.pow(2, varCount.y)
@@ -60,7 +66,7 @@ export class KarnaughMap {
      * @returns {[String, String]} The two groups of variables
      */
     getVarGroups() {
-        const varCount = this.getXYVarCount();
+        const varCount = getXYVarCount(this.varCount);
         return [ this.varNames.slice(0, varCount.x).join(""), this.varNames.slice(varCount.x, varCount.x + varCount.y).join("") ];
     }
 
@@ -76,7 +82,7 @@ export class KarnaughMap {
         
         const binaryValues = [ "00", "01", "11", "10" ];
 
-        const varCount = this.getXYVarCount();
+        const varCount = getXYVarCount(this.varCount);
         const possibleValues = new UMath.Vec2(
             Math.pow(2, varCount.x),
             Math.pow(2, varCount.y)
@@ -160,7 +166,7 @@ export class KarnaughMap {
      * @param {Number} y2 - The ending y coord relative to the grid of the new group
      * @param {Array<Number>} color - The color of the new group
      * @param {Boolean} onlyPowsOf2 - Whether or not to only use powers of base 2 as the group size
-     * @returns {[Number, Number, Number, Number, [Number, Number, Number]]} The newly created group
+     * @returns {Group} The newly created group
      */
     getAsGroup(x1, y1, x2, y2, color = [255, 255, 255], onlyPowsOf2 = true) {
         const gridSize = this.getSize();
@@ -186,7 +192,7 @@ export class KarnaughMap {
      * @param {Number} y2 - The ending y coord relative to the grid of the new group
      * @param {Array<Number>} color - The color of the new group
      * @param {Boolean} onlyPowsOf2 - Whether or not to only use powers of base 2 as the group size
-     * @returns {[Number, Number, Number, Number, [Number, Number, Number]]} The newly added group
+     * @returns {Group} The newly added group
      */
     addGroup(x1, y1, x2, y2, color = [255, 255, 255], onlyPowsOf2 = true) {
         this.groups.push(
@@ -198,7 +204,7 @@ export class KarnaughMap {
     /**
      * Draws the specified group on the specified canvas
      * @param {wCanvas} canvas - The canvas to draw the group on
-     * @param {[Number, Number, Number, Number, Array<Number>]} group - The group to draw
+     * @param {Group} group - The group to draw
      */
     drawGroup(canvas, group) {
 
@@ -325,5 +331,60 @@ export class KarnaughMap {
         );
     }
 
+    /**
+     * Serializes this KarnaughMap into a JSON string
+     * @returns {false|String} False if it failed to serialize, the serialized style if it succeeded
+     */
+    serialize() {
+        if (isValidKarnaughMap(this)) {
+
+            return JSON.stringify(
+                {
+                    "groups": this.groups,
+                    "outValues": this.outValues,
+                    "style": mapStyleToDict(this.style),
+                    "varCount": this.varCount,
+                    "varNames": this.varNames
+                }, undefined, 0
+            );
+
+        }
+
+        return false;
+    }
+
+    /**
+     * Loads the specified JSON string into itself
+     * @param {String} str - The string to deserialize
+     * @returns {Boolean} Whether or not deserialization was succesful
+     */
+    deserialize(str) {
+
+        try {
+            const kMap = JSON.parse(str);
+            if (isValidKarnaughMap(kMap)) {
+                this.groups = kMap.groups;
+                this.outValues = kMap.outValues;
+                this.style = new MapStyle(
+                        kMap.style.lines.color,
+                        kMap.style.lines.width,
+                        kMap.style.text.color,
+                        kMap.style.text.scale,
+                        kMap.style.outValues.color,
+                        kMap.style.outValues.scale,
+                        kMap.style.groups.borderWidth,
+                );
+                this.varCount = kMap.varCount;
+                this.varNames = kMap.varNames;
+
+                return true;
+            }
+        } catch (err) {
+            console.error("Failed to deserialize KarnaughMap:", str);
+        }
+
+        return false;
+
+    }
 }
 
