@@ -31,6 +31,10 @@
             background: black;
         }
 
+        .hidden {
+            display: none;
+        }
+
         .menu {
             overflow: visible;
             width: 20%;
@@ -39,6 +43,7 @@
         }
 
         .guiElement {
+            display: block;
             box-sizing: border-box;
             margin: 5px;
             width: 100%;
@@ -55,10 +60,12 @@
 </head>
 <body>
     <div class="menu">
-        <button class="guiElement" onclick="saveImage()">Save Canvas</button>
+        <button class="guiElement" onclick="saveImage()">Save Image</button>
         <button class="guiElement" onclick="resetGroups()">Reset Groups</button>
         <input class="guiElement" id="varCount" type="text" placeholder="Variable Count" onchange="updateVariables()">
         <input class="guiElement" id="varNames" type="text" placeholder="Variable Names (csv)" onchange="updateVariables()">
+        <button class="guiElement" onclick="saveMap()">Save Map</button>
+        <button class="guiElement" onclick="loadMap()">Load Map</button>
     </div>
 </body>
 </html>

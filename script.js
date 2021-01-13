@@ -97,6 +97,35 @@ window.addEventListener("load", () => {
         a.click();
     }
 
+    window.saveMap = () => {
+        const a = document.createElement("a");
+        a.href = "data:application/json," + encodeURI(GLOBAL_MAP.serialize());
+        a.download = "Karnaugh Map";
+        a.click();
+    }
+
+    window.loadMap = () => {
+        const loader = document.createElement("input");
+        loader.type = "file";
+        loader.accept = ".txt,application/json";
+        loader.multiple = false;
+
+        loader.oninput = () => {
+            const file = loader.files.item(0);
+            if (file !== null) {
+                file.text().then(
+                    text => {
+                        GLOBAL_MAP.deserialize(text);
+                        onResize(mainCanvas);
+                    }
+                );
+            }
+        }
+
+        loader.click();
+        return true;
+    }
+
     window.changeVariables = (count = GLOBAL_MAP.varCount, variableNames = [ "A", "B", "C", "D" ]) => {
         GLOBAL_MAP.changeVariables(count, variableNames);
         onResize(mainCanvas);
