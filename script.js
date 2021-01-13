@@ -14,6 +14,9 @@ let selStart = new UMath.Vec2();
 let selEnd = new UMath.Vec2();
 let currentColor = [ 255, 0, 0 ];
 
+const DEFAULT_SELECTION_COLOR = [ 255, 255, 255 ];
+let useCurrentColorForSelection = false;
+
 const GLOBAL_MAP = new KarnaughMap(0, 0, 128);
 window.GLOBAL_MAP = GLOBAL_MAP;
 GLOBAL_MAP.style = MAP_STYLE;
@@ -61,7 +64,7 @@ function draw(canvas, deltaTime) {
     GLOBAL_MAP.draw(canvas);
 
     if (selecting) {
-        GLOBAL_MAP.drawGroup(canvas, selToGroup([ 255, 255, 255 ]));
+        GLOBAL_MAP.drawGroup(canvas, selToGroup(useCurrentColorForSelection ? currentColor.slice() : DEFAULT_SELECTION_COLOR.slice()));
     }
 }
 
@@ -199,9 +202,9 @@ window.addEventListener("keydown", ev => {
         GLOBAL_MAP.groups.push(selToGroup());
         
         currentColor = [
-            UMath.map(Math.random(), 0, 1, 25, 230),
-            UMath.map(Math.random(), 0, 1, 25, 230),
-            UMath.map(Math.random(), 0, 1, 25, 230)
+            Math.round(UMath.map(Math.random(), 0, 1, 25, 230)),
+            Math.round(UMath.map(Math.random(), 0, 1, 25, 230)),
+            Math.round(UMath.map(Math.random(), 0, 1, 25, 230))
         ];
     }
 });
