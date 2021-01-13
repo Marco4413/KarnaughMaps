@@ -68,7 +68,23 @@ function draw(canvas, deltaTime) {
     }
 }
 
+/**
+ * @param {HTMLButtonElement} btn
+ * @param {Boolean} sync
+ */
+window.toggleSelectionColor = (btn, sync) => {
+    if (!sync) { useCurrentColorForSelection = !useCurrentColorForSelection; }
+    btn.style.color = useCurrentColorForSelection ? "#0f0" : "#f00";
+}
+
 window.addEventListener("load", () => {
+    {
+        const selColor = document.getElementById("selColor");
+        if (selColor !== null) {
+            window.toggleSelectionColor(selColor, true);
+        }
+    }
+
     const onResize = canvas => {
         canvas.canvas.width = window.innerWidth - 1;
         canvas.canvas.height = window.innerHeight - 1;

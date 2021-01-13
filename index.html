@@ -57,10 +57,15 @@
             text-align: center;
         }
 
+        button.guiElement:hover {
+            cursor: pointer;
+        }
+
     </style>
 </head>
 <body>
     <div class="menu">
+        <button class="guiElement" id="selColor" onclick="toggleSelectionColor(this)">Use Group Color for Selection</button>
         <button class="guiElement" onclick="saveImage()">Save Image</button>
         <button class="guiElement" onclick="resetGroups()">Reset Groups</button>
         <input class="guiElement" id="varCount" type="text" placeholder="Variable Count" onchange="updateVariables()">
