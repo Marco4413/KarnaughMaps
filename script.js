@@ -19,7 +19,18 @@ window.GLOBAL_MAP = GLOBAL_MAP;
 GLOBAL_MAP.style = MAP_STYLE;
 
 /**
+ * @param {UMath.Vec2} pos
+ * @returns {Boolean}
+ */
+function isInsideMap(pos) {
+    const kmSize = GLOBAL_MAP.getSize().mul(GLOBAL_MAP.cellSize);
+    return pos.x >= GLOBAL_MAP.cellSize + GLOBAL_MAP.pos.x && pos.y >= GLOBAL_MAP.cellSize + GLOBAL_MAP.pos.y &&
+        pos.x < GLOBAL_MAP.pos.x + kmSize.x + GLOBAL_MAP.cellSize && pos.y < GLOBAL_MAP.pos.y + kmSize.y + GLOBAL_MAP.cellSize;
+}
+
+/**
  * @param {[Number, Number, Number]} color
+ * @returns {import("./KarnaughMap.js").Group}
  */
 function selToGroup(color) {
 
@@ -151,11 +162,7 @@ window.addEventListener("load", () => {
 });
 
 window.addEventListener("mousedown", ev => {
-    const kmSize = GLOBAL_MAP.getSize().mul(GLOBAL_MAP.cellSize);
-    if (
-        ev.x >= GLOBAL_MAP.cellSize + GLOBAL_MAP.pos.x && ev.y >= GLOBAL_MAP.cellSize + GLOBAL_MAP.pos.y &&
-        ev.x < GLOBAL_MAP.pos.x + kmSize.x + GLOBAL_MAP.cellSize && ev.y < GLOBAL_MAP.pos.y + kmSize.y + GLOBAL_MAP.cellSize
-    ) {
+    if (isInsideMap(ev)) {
         if (ev.ctrlKey) {
             const cellPos = GLOBAL_MAP.globalPosToGridCell(ev.x, ev.y);
             GLOBAL_MAP.toggleOut(cellPos.x, cellPos.y);
@@ -168,6 +175,13 @@ window.addEventListener("mousedown", ev => {
         }
     }
 });
+
+window.addEventListener("dblclick", ev => {
+    if (isInsideMap(ev)) {
+        const cellPos = GLOBAL_MAP.globalPosToGridCell(ev.x, ev.y);
+        GLOBAL_MAP.toggleOut(cellPos.x, cellPos.y);
+    }
+})
 
 window.addEventListener("mouseup", () => selecting = false);
 
