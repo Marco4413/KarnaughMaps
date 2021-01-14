@@ -36,9 +36,11 @@
         }
 
         .menu {
-            overflow: visible;
+            padding: 5px;
+            overflow-x: hidden;
+            overflow-y: auto;
             width: 20%;
-            height: 50%;
+            height: 100%;
             position: absolute;
         }
 
@@ -46,7 +48,8 @@
             user-select: none;
             display: block;
             box-sizing: border-box;
-            margin: 5px;
+            margin-top: 5px;
+            margin-bottom: 5px;
             width: 100%;
             background: black;
             color: white;
@@ -61,6 +64,18 @@
             cursor: pointer;
         }
 
+        input[type="color"].guiElement {
+            border: none;
+        }
+
+        input[type="color"].guiElement:focus {
+            outline: none;
+        }
+
+        label.guiElement {
+            border: none;
+        }
+
     </style>
 </head>
 <body>
@@ -68,10 +83,15 @@
         <button class="guiElement" id="selColor" onclick="toggleSelectionColor(this)">Use Group Color for Selection</button>
         <button class="guiElement" onclick="saveImage()">Save Image</button>
         <button class="guiElement" onclick="resetGroups()">Reset Groups</button>
+        <button class="guiElement" id="selConf" onclick="confirmSelection()">Confirm Selection</button>
         <input class="guiElement" id="varCount" type="text" placeholder="Variable Count" onchange="updateVariables()">
         <input class="guiElement" id="varNames" type="text" placeholder="Variable Names (csv)" onchange="updateVariables()">
         <button class="guiElement" onclick="saveMap()">Save Map</button>
         <button class="guiElement" onclick="loadMap()">Load Map</button>
+        <div class="guiElement">
+            <label class="guiElement" for="groupColor">Next Color</label>
+            <input class="guiElement" type="color" id="groupColor" oninput="changeColor(this.value, true)">
+        </div>
     </div>
 </body>
 </html>
