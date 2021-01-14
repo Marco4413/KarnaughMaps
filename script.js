@@ -274,7 +274,10 @@ window.addEventListener("load", () => {
      */
     window.changeColor = (color, isHex) => {
         currentColor = isHex ? hexToRGB(color) : color;
-        groupColorSelector.value = RGBtoHex(currentColor);
+
+        if (groupColorSelector !== null) {
+            groupColorSelector.value = RGBtoHex(currentColor);
+        }
     }
     window.changeColor(currentColor);
 });
