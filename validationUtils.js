@@ -1,18 +1,15 @@
 
-import { UMath } from "./wCanvas/wcanvas.js";
+import { UMath, Color } from "./wCanvas/wcanvas.js";
 import { KarnaughMap, getXYVarCount } from "./KarnaughMap.js";
 import { MapStyle } from "./MapStyle.js";
 
 /**
  * Checks if the specified color is valid
- * @param {[Number, Number, Number]} color - The color to check for
+ * @param {Color|String|Number|Array<Number>} color - The color to check for
  * @returns {Boolean} Whether or not the color is a valid one
  */
 export function isValidColor(color) {
-    return color instanceof Array && color.length === 3 &&
-        typeof color[0] === "number" && color[0] >= 0 && color[0] <= 255 &&
-        typeof color[1] === "number" && color[1] >= 0 && color[1] <= 255 &&
-        typeof color[2] === "number" && color[2] >= 0 && color[2] <= 255;
+    return Color.getType(color).isValid;
 }
 
 /**

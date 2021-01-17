@@ -1,4 +1,5 @@
 
+import { Color } from "./wCanvas/wcanvas.js";
 import { isValidMapStyle } from "./validationUtils.js";
 
 /**
@@ -9,15 +10,15 @@ import { isValidMapStyle } from "./validationUtils.js";
 export function mapStyleToDict(mapStyle) {
     return {
         "lines": {
-            "color": mapStyle.lines.color.slice(0, 3),
+            "color": mapStyle.lines.color.toRGB(),
             "width": mapStyle.lines.width
         },
         "text": {
-            "color": mapStyle.text.color.slice(0, 3),
+            "color": mapStyle.text.color.toRGB(),
             "scale": mapStyle.text.scale
         },
         "outValues": {
-            "color": mapStyle.outValues.color.slice(0, 3),
+            "color": mapStyle.outValues.color.toRGB(),
             "scale": mapStyle.outValues.scale
         },
         "groups": {
@@ -29,25 +30,25 @@ export function mapStyleToDict(mapStyle) {
 export class MapStyle {
 
     /**
-     * @param {[ Number, Number, Number ]} linesColor 
+     * @param {Color|String|Number|[ Number, Number, Number ]} linesColor 
      * @param {Number} linesWidth 
-     * @param {[ Number, Number, Number ]} textColor 
+     * @param {Color|String|Number|[ Number, Number, Number ]} textColor 
      * @param {Number} textScale 
-     * @param {[ Number, Number, Number ]} outValuesColor 
+     * @param {Color|String|Number|[ Number, Number, Number ]} outValuesColor 
      * @param {Number} outValuesScale 
      * @param {Number} groupsBorderWidth 
      */
-    constructor(linesColor = [255, 255, 255], linesWidth = 2, textColor = [255, 255, 255], textScale = 0.33, outValuesColor = [255, 255, 255], outValuesScale = 0.5, groupsBorderWidth = 4) {
+    constructor(linesColor = 255, linesWidth = 2, textColor = 255, textScale = 0.33, outValuesColor = 255, outValuesScale = 0.5, groupsBorderWidth = 4) {
         this.lines = {
-            "color": linesColor,
+            "color": new Color(linesColor),
             "width": linesWidth
         };
         this.text = {
-            "color": textColor,
+            "color": new Color(textColor),
             "scale": textScale
         };
         this.outValues = {
-            "color": outValuesColor,
+            "color": new Color(outValuesColor),
             "scale": outValuesScale
         };
         this.groups = {
@@ -81,16 +82,27 @@ export class MapStyle {
         try {
             const style = JSON.parse(str);
             if (isValidMapStyle(style)) {
-                this.lines = style.lines;
-                this.text = style.text;
-                this.outValues = style.outValues;
-                this.groups = style.groups;
+                this.lines = {
+                    "color": new Color(style.lines.color),
+                    "width": style.lines.width
+                };
+                this.text = {
+                    "color": new Color(style.text.color),
+                    "scale": style.text.scale
+                };
+                this.outValues = {
+                    "color": new Color(style.outValues.color),
+                    "scale": style.outValues.scale
+                };
+                this.groups = {
+                    "borderWidth": style.groups.borderWidth
+                };
 
                 return true;
             }
-        } catch (err) {
-            console.error("Failed to deserialize MapStyle:", str);
-        }
+        } catch (err) { }
+
+        console.error("Failed to deserialize MapStyle:", str);
 
         return false;
 

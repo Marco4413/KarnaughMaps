@@ -1,5 +1,5 @@
 
-import { wCanvas, UMath } from "./wCanvas/wcanvas.js";
+import { wCanvas, UMath, Color } from "./wCanvas/wcanvas.js";
 import { MapStyle, mapStyleToDict } from "./MapStyle.js";
 import { isValidKarnaughMap } from "./validationUtils.js";
 
@@ -164,7 +164,7 @@ export class KarnaughMap {
      * @param {Number} y1 - The starting y coord relative to the grid of the new group
      * @param {Number} x2 - The ending x coord relative to the grid of the new group
      * @param {Number} y2 - The ending y coord relative to the grid of the new group
-     * @param {Array<Number>} color - The color of the new group
+     * @param {Color|String|Number|Array<Number>} color - The color of the new group
      * @param {Boolean} onlyPowsOf2 - Whether or not to only use powers of base 2 as the group size
      * @returns {Group} The newly created group
      */
@@ -181,7 +181,7 @@ export class KarnaughMap {
             size.y = Math.pow(2, Math.round(Math.log2(size.y)));
         }
 
-        return [ x1, y1, size.x, size.y, color ];
+        return [ x1, y1, size.x, size.y, new Color(color) ];
     }
 
     /**
@@ -210,7 +210,7 @@ export class KarnaughMap {
 
         let [x, y, w, h, color] = group;
         
-        canvas.stroke(...color);
+        canvas.stroke(color);
         canvas.strokeWeigth(this.style.groups.borderWidth);
         const maxSize = this.getSize();
 
@@ -262,8 +262,8 @@ export class KarnaughMap {
      * @param {wCanvas} canvas - The canvas to draw the map on
      */
     draw(canvas) {
-        canvas.fill(...this.style.text.color);
-        canvas.stroke(...this.style.lines.color);
+        canvas.fill(this.style.text.color);
+        canvas.stroke(this.style.lines.color);
         canvas.strokeWeigth(this.style.lines.width);
 
         canvas.line(this.pos.x, this.pos.y, this.pos.x + this.cellSize, this.pos.y + this.cellSize);
@@ -313,7 +313,7 @@ export class KarnaughMap {
             );
         }
 
-        canvas.fill(...this.style.outValues.color);
+        canvas.fill(this.style.outValues.color);
         canvas.textSize(window.cellSize * this.style.outValues.scale);
         for (let y = 0; y < Math.min(this.outValues.length, gridSize.y); y++) {
             const row = this.outValues[y];
@@ -340,7 +340,11 @@ export class KarnaughMap {
 
             return JSON.stringify(
                 {
-                    "groups": this.groups,
+                    "groups": this.groups.map(group => {
+                        const copy = group.slice();
+                        copy[copy.length - 1] = copy[copy.length - 1].toRGB();
+                        return copy;
+                    }),
                     "outValues": this.outValues,
                     "style": mapStyleToDict(this.style),
                     "varCount": this.varCount,
@@ -363,7 +367,11 @@ export class KarnaughMap {
         try {
             const kMap = JSON.parse(str);
             if (isValidKarnaughMap(kMap)) {
-                this.groups = kMap.groups;
+                this.groups = kMap.groups.map(group => {
+                    group[group.length - 1] = new Color(group[group.length - 1]);
+                    return group;
+                });
+
                 this.outValues = kMap.outValues;
                 this.style = new MapStyle(
                         kMap.style.lines.color,
@@ -379,9 +387,9 @@ export class KarnaughMap {
 
                 return true;
             }
-        } catch (err) {
-            console.error("Failed to deserialize KarnaughMap:", str);
-        }
+        } catch (err) { }
+
+        console.error("Failed to deserialize KarnaughMap:", str);
 
         return false;
 

@@ -1,5 +1,5 @@
 
-import { wCanvas, UMath } from "./wCanvas/wcanvas.js";
+import { wCanvas, UMath, Color } from "./wCanvas/wcanvas.js";
 
 import { KarnaughMap } from "./KarnaughMap.js";
 import { MapStyle } from "./MapStyle.js";
@@ -12,10 +12,10 @@ const MAP_STYLE = new MapStyle();
 let selecting = false;
 let selStart = new UMath.Vec2();
 let selEnd = new UMath.Vec2();
-let currentColor = [ 255, 0, 0 ];
+let currentColor = new Color("#f00");
 let touchIdentifier = undefined;
 
-const DEFAULT_SELECTION_COLOR = [ 255, 255, 255 ];
+const DEFAULT_SELECTION_COLOR = new Color("#fff");
 let useCurrentColorForSelection = false;
 
 const GLOBAL_MAP = new KarnaughMap(0, 0, 128);
@@ -77,29 +77,6 @@ const confirmSelection = () => {
 window.confirmSelection = confirmSelection;
 
 /**
- * @param {String} hex
- * @returns {[Number, Number, Number]}
- */
-function hexToRGB(hex) {
-    const RGBHex = hex.substr(1).match(/.{2}/g);
-    return RGBHex.map(v => parseInt(v, 16));
-}
-
-/**
- * @param {[Number, Number, Number]} RGB
- * @returns {String}
- */
-function RGBtoHex(RGB) {
-    return "#" + RGB.map(v => {
-        let hex = v.toString(16);
-        if (hex.length < 2) {
-            hex = "0" + hex;
-        }
-        return hex;
-    }).join("");
-}
-
-/**
  * @param {UMath.Vec2} pos
  * @returns {Boolean}
  */
@@ -110,7 +87,7 @@ function isInsideMap(pos) {
 }
 
 /**
- * @param {[Number, Number, Number]} color
+ * @param {Color} color
  * @returns {import("./KarnaughMap.js").Group}
  */
 function selToGroup(color) {
@@ -126,8 +103,7 @@ function selToGroup(color) {
     );
 
     return GLOBAL_MAP.getAsGroup(
-        gridSelStart.x, gridSelStart.y, gridSelEnd.x, gridSelEnd.y,
-        color === undefined ? currentColor.slice() : color.slice()
+        gridSelStart.x, gridSelStart.y, gridSelEnd.x, gridSelEnd.y, color === undefined ? currentColor : color
     );
     
 }
@@ -142,7 +118,7 @@ function draw(canvas, deltaTime) {
     GLOBAL_MAP.draw(canvas);
 
     if (selecting) {
-        GLOBAL_MAP.drawGroup(canvas, selToGroup(useCurrentColorForSelection ? currentColor.slice() : DEFAULT_SELECTION_COLOR.slice()));
+        GLOBAL_MAP.drawGroup(canvas, selToGroup(useCurrentColorForSelection ? currentColor : DEFAULT_SELECTION_COLOR));
     }
 }
 
@@ -269,14 +245,14 @@ window.addEventListener("load", () => {
     }
 
     /**
-     * @param {String|[Number, Number, Number]} color
+     * @param {Color|String|[Number, Number, Number]} color
      * @param {Boolean} isHex
      */
-    window.changeColor = (color, isHex) => {
-        currentColor = isHex ? hexToRGB(color) : color;
+    window.changeColor = (color) => {
+        currentColor = new Color(color);
 
         if (groupColorSelector !== null) {
-            groupColorSelector.value = RGBtoHex(currentColor);
+            groupColorSelector.value = currentColor.toHex(false);
         }
     }
     window.changeColor(currentColor);
