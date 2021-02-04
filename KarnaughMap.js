@@ -342,7 +342,7 @@ export class KarnaughMap {
                 {
                     "groups": this.groups.map(group => {
                         const copy = group.slice();
-                        copy[copy.length - 1] = copy[copy.length - 1].toRGB();
+                        copy[copy.length - 1] = copy[copy.length - 1].toRGB(true);
                         return copy;
                     }),
                     "outValues": this.outValues,

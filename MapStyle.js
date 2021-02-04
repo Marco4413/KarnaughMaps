@@ -10,15 +10,15 @@ import { isValidMapStyle } from "./validationUtils.js";
 export function mapStyleToDict(mapStyle) {
     return {
         "lines": {
-            "color": mapStyle.lines.color.toRGB(),
+            "color": mapStyle.lines.color.toRGB(true),
             "width": mapStyle.lines.width
         },
         "text": {
-            "color": mapStyle.text.color.toRGB(),
+            "color": mapStyle.text.color.toRGB(true),
             "scale": mapStyle.text.scale
         },
         "outValues": {
-            "color": mapStyle.outValues.color.toRGB(),
+            "color": mapStyle.outValues.color.toRGB(true),
             "scale": mapStyle.outValues.scale
         },
         "groups": {
