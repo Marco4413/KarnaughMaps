@@ -306,9 +306,14 @@ window.addEventListener("touchend", ev => {
 
 window.addEventListener("mousedown", ev => {
     if (isInsideMap(ev)) {
+        const cellPos = GLOBAL_MAP.globalPosToGridCell(ev.x, ev.y);
         if (ev.ctrlKey) {
-            const cellPos = GLOBAL_MAP.globalPosToGridCell(ev.x, ev.y);
             GLOBAL_MAP.toggleOut(cellPos.x, cellPos.y);
+        } else if (ev.shiftKey) {
+            const i = GLOBAL_MAP.getGroupIndexAt(cellPos.x, cellPos.y);
+            if (i >= 0) {
+                GLOBAL_MAP.groups.splice(i, 1);
+            }
         } else {
             // Selection only starts if it wasn't already started
             // So no touch events should be overridden by the mouse

@@ -41,6 +41,7 @@ export class KarnaughMap {
 
         this.pos = new UMath.Vec2(x, y);
         this.cellSize = cellSize;
+        /** @type {Group[]} */
         this.groups = [];
 
         this.varNames = [ "A", "B", "C", "D" ];
@@ -182,6 +183,36 @@ export class KarnaughMap {
         }
 
         return [ x1, y1, size.x, size.y, new Color(color) ];
+    }
+
+    /**
+     * Returns the index of the top group at x, y
+     * @param {Number} x - The x pos to check
+     * @param {Number} y - The y pos to check
+     * @returns {Number} The index of the group at x, y
+     */
+    getGroupIndexAt(x, y) {
+
+        for (let i = this.groups.length - 1; i >= 0; i--) {
+            const group = this.groups[i];
+            const [ gX, gY, gW, gH ] = group;
+            const gridSize = this.getSize();
+
+            // Wrapping the given pos on the grid relative to the group's origin
+            const wrappedPos = new UMath.Vec2(
+                (x - gX) % gridSize.x,
+                (y - gY) % gridSize.y
+            );
+            wrappedPos.x = wrappedPos.x < 0 ? gridSize.x + wrappedPos.x : wrappedPos.x;
+            wrappedPos.y = wrappedPos.y < 0 ? gridSize.y + wrappedPos.y : wrappedPos.y;
+            
+            if (wrappedPos.x >= 0 && wrappedPos.y >= 0 && wrappedPos.x < gW && wrappedPos.y < gH) {
+                return i;
+            }
+        }
+
+        return -1;
+
     }
 
     /**
