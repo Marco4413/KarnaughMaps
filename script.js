@@ -4,6 +4,7 @@ import { wCanvas, UMath, Color } from "./wCanvas/wcanvas.js";
 import { KarnaughMap } from "./KarnaughMap.js";
 import { MapStyle } from "./MapStyle.js";
 
+const SAVE_CELL_SIZE = 128;
 const SAVE_BORDER_WIDTH = 10;
 const SAVE_STYLE = new MapStyle([0, 0, 0], 2, [0, 0, 0], 0.33, [0, 0, 0], 0.5, 4);
 
@@ -173,17 +174,12 @@ window.addEventListener("load", () => {
     window.saveImage = () => {
         // Setting the offscreen canvas's size to the size of the map
         const gridSize = GLOBAL_MAP.getSize().add(1);
-        offscreenCanvas.canvas.width = gridSize.x * GLOBAL_MAP.cellSize + SAVE_BORDER_WIDTH * 2;
-        offscreenCanvas.canvas.height = gridSize.y * GLOBAL_MAP.cellSize + SAVE_BORDER_WIDTH * 2;
+        offscreenCanvas.canvas.width = gridSize.x * SAVE_CELL_SIZE + SAVE_BORDER_WIDTH * 2;
+        offscreenCanvas.canvas.height = gridSize.y * SAVE_CELL_SIZE + SAVE_BORDER_WIDTH * 2;
         offscreenCanvas.clear();
 
         // Moving the map to 0,0 and drawing it on the offscreen canvas
-        const oldPos = GLOBAL_MAP.pos.copy();
-        GLOBAL_MAP.pos = UMath.Vec2.add({ "x": 0, "y": 0 }, SAVE_BORDER_WIDTH);
-        GLOBAL_MAP.style = SAVE_STYLE;
-        GLOBAL_MAP.draw(offscreenCanvas);
-        GLOBAL_MAP.style = MAP_STYLE;
-        GLOBAL_MAP.pos = oldPos;
+        GLOBAL_MAP.draw(offscreenCanvas, { "pos": new UMath.Vec2(0, 0), "cellSize": SAVE_CELL_SIZE, "style": SAVE_STYLE });
 
         // Creating href and opening it
         const a = document.createElement("a");

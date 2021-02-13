@@ -8,6 +8,13 @@ import { isValidKarnaughMap } from "./validationUtils.js";
  */
 
 /**
+ * @typedef {Object} DrawOverrideConfig
+ * @property {UMath.Vec2} pos
+ * @property {Number} cellSize
+ * @property {MapStyle} style
+ */
+
+/**
  * The count of variables on the x and y axis
  * @param {Number} count - The total number of variables
  * @returns {UMath.Vec2} The count of variables on the x and y axis
@@ -236,13 +243,17 @@ export class KarnaughMap {
      * Draws the specified group on the specified canvas
      * @param {wCanvas} canvas - The canvas to draw the group on
      * @param {Group} group - The group to draw
+     * @param {DrawOverrideConfig} override - Overrides map properties
      */
-    drawGroup(canvas, group) {
+    drawGroup(canvas, group, override = { }) {
+        const pos      = override.pos      === undefined ? this.pos      : override.pos     ;
+        const cellSize = override.cellSize === undefined ? this.cellSize : override.cellSize;
+        const style    = override.style    === undefined ? this.style    : override.style   ;
 
         let [x, y, w, h, color] = group;
         
         canvas.stroke(color);
-        canvas.strokeWeigth(this.style.groups.borderWidth);
+        canvas.strokeWeigth(style.groups.borderWidth);
         const maxSize = this.getSize();
 
         w = UMath.constrain(w, 1, maxSize.x);
@@ -257,33 +268,33 @@ export class KarnaughMap {
 
         {
             canvas.rect(
-                this.pos.x + (start.x + 1) * this.cellSize, this.pos.y + (start.y + 1) * this.cellSize,
-                size.x * this.cellSize * (xOverflow > 0 ? 2 : 1), size.y * this.cellSize * (yOverflow > 0 ? 2 : 1),
-                { "noFill": true, "rounded": { "radius": this.cellSize / 2, "radiusMode": "pixels", "corners": [true, xOverflow === 0, xOverflow === 0 && yOverflow === 0, yOverflow === 0] } }
+                pos.x + (start.x + 1) * cellSize, pos.y + (start.y + 1) * cellSize,
+                size.x * cellSize * (xOverflow > 0 ? 2 : 1), size.y * cellSize * (yOverflow > 0 ? 2 : 1),
+                { "noFill": true, "rounded": { "radius": cellSize / 2, "radiusMode": "pixels", "corners": [true, xOverflow === 0, xOverflow === 0 && yOverflow === 0, yOverflow === 0] } }
             );
         }
 
         if (xOverflow > 0) {
             canvas.rect(
-                this.pos.x + this.cellSize - xOverflow * this.cellSize, this.pos.y + (start.y + 1) * this.cellSize,
-                xOverflow * this.cellSize * 2, size.y * this.cellSize * (yOverflow > 0 ? 2 : 1),
-                { "noFill": true, "rounded": { "radius": this.cellSize / 2, "radiusMode": "pixels", "corners": [false, true, yOverflow === 0, false] } }
+                pos.x + cellSize - xOverflow * cellSize, pos.y + (start.y + 1) * cellSize,
+                xOverflow * cellSize * 2, size.y * cellSize * (yOverflow > 0 ? 2 : 1),
+                { "noFill": true, "rounded": { "radius": cellSize / 2, "radiusMode": "pixels", "corners": [false, true, yOverflow === 0, false] } }
             );
         }
 
         if (yOverflow > 0) {
             canvas.rect(
-                this.pos.x + (start.x + 1) * this.cellSize, this.pos.y + this.cellSize - yOverflow * this.cellSize,
-                size.x * this.cellSize * (xOverflow > 0 ? 2 : 1), yOverflow * this.cellSize * 2,
-                { "noFill": true, "rounded": { "radius": this.cellSize / 2, "radiusMode": "pixels", "corners": [false, false, xOverflow === 0, true] } }
+                pos.x + (start.x + 1) * cellSize, pos.y + cellSize - yOverflow * cellSize,
+                size.x * cellSize * (xOverflow > 0 ? 2 : 1), yOverflow * cellSize * 2,
+                { "noFill": true, "rounded": { "radius": cellSize / 2, "radiusMode": "pixels", "corners": [false, false, xOverflow === 0, true] } }
             );
         }
 
         if (xOverflow > 0 && yOverflow > 0) {
             canvas.rect(
-                this.pos.x + this.cellSize - xOverflow * this.cellSize, this.pos.y + this.cellSize - yOverflow * this.cellSize,
-                xOverflow * this.cellSize * 2, yOverflow * this.cellSize * 2,
-                { "noFill": true, "rounded": { "radius": this.cellSize / 2, "radiusMode": "pixels", "corners": [false, false, true, false] } }
+                pos.x + cellSize - xOverflow * cellSize, pos.y + cellSize - yOverflow * cellSize,
+                xOverflow * cellSize * 2, yOverflow * cellSize * 2,
+                { "noFill": true, "rounded": { "radius": cellSize / 2, "radiusMode": "pixels", "corners": [false, false, true, false] } }
             );
         }
     }
@@ -291,15 +302,20 @@ export class KarnaughMap {
     /**
      * Draws the whole map on the specified canvas
      * @param {wCanvas} canvas - The canvas to draw the map on
+     * @param {DrawOverrideConfig} override - Overrides map properties
      */
-    draw(canvas) {
-        canvas.fill(this.style.text.color);
-        canvas.stroke(this.style.lines.color);
-        canvas.strokeWeigth(this.style.lines.width);
+    draw(canvas, override = { }) {
+        const pos      = override.pos      === undefined ? this.pos      : override.pos     ;
+        const cellSize = override.cellSize === undefined ? this.cellSize : override.cellSize;
+        const style    = override.style    === undefined ? this.style    : override.style   ;
 
-        canvas.line(this.pos.x, this.pos.y, this.pos.x + this.cellSize, this.pos.y + this.cellSize);
+        canvas.fill(style.text.color);
+        canvas.stroke(style.lines.color);
+        canvas.strokeWeigth(style.lines.width);
 
-        const textScale = this.cellSize * this.style.text.scale;
+        canvas.line(pos.x, pos.y, pos.x + cellSize, pos.y + cellSize);
+
+        const textScale = cellSize * style.text.scale;
         canvas.textSize(textScale);
 
         const gridSize = this.getSize();
@@ -308,16 +324,16 @@ export class KarnaughMap {
             const [ xGroup, yGroup ] = this.getVarGroups();
 
             const maxWidth = Math.max(canvas.context.measureText(xGroup).width, canvas.context.measureText(yGroup).width);
-            const rescale = maxWidth > this.cellSize / 2 ? (this.cellSize / 2) / maxWidth : 1;
+            const rescale = maxWidth > cellSize / 2 ? (cellSize / 2) / maxWidth : 1;
             canvas.textSize(textScale * rescale);
 
             canvas.text(
-                xGroup, this.pos.x + this.cellSize / 2, this.pos.y + this.cellSize / 2,
+                xGroup, pos.x + cellSize / 2, pos.y + cellSize / 2,
                 { "alignment": { "horizontal": "left", "vertical": "bottom" } }
             );
 
             canvas.text(
-                yGroup, this.pos.x + this.cellSize / 2, this.pos.y + this.cellSize / 2,
+                yGroup, pos.x + cellSize / 2, pos.y + cellSize / 2,
                 { "alignment": { "horizontal": "right", "vertical": "top" } }
             );
         }
@@ -325,40 +341,40 @@ export class KarnaughMap {
         canvas.textSize(textScale);
         const varValues = this.getVarValues();
         for (let i = 0; i < varValues.x.length; i++) {
-            const x = this.pos.x + this.cellSize * (i + 1);
-            canvas.line(x, this.pos.y, x, this.pos.y + this.cellSize * (gridSize.y + 1));
+            const x = pos.x + cellSize * (i + 1);
+            canvas.line(x, pos.y, x, pos.y + cellSize * (gridSize.y + 1));
 
             canvas.text(
-                varValues.x[i], x + this.cellSize / 2, this.pos.y + this.cellSize / 2,
+                varValues.x[i], x + cellSize / 2, pos.y + cellSize / 2,
                 { "alignment": { "horizontal": "center", "vertical": "center" } }
             );
         }
 
         for (let i = 0; i < varValues.y.length; i++) {
-            const y = this.pos.y + this.cellSize * (i + 1);
-            canvas.line(this.pos.x, y, this.pos.x + this.cellSize * (gridSize.x + 1), y);
+            const y = pos.y + cellSize * (i + 1);
+            canvas.line(pos.x, y, pos.x + cellSize * (gridSize.x + 1), y);
 
             canvas.text(
-                varValues.y[i], this.pos.x + this.cellSize / 2, y + this.cellSize / 2,
+                varValues.y[i], pos.x + cellSize / 2, y + cellSize / 2,
                 { "alignment": { "horizontal": "center", "vertical": "center" } }
             );
         }
 
-        canvas.fill(this.style.outValues.color);
-        canvas.textSize(window.cellSize * this.style.outValues.scale);
+        canvas.fill(style.outValues.color);
+        canvas.textSize(window.cellSize * style.outValues.scale);
         for (let y = 0; y < Math.min(this.outValues.length, gridSize.y); y++) {
             const row = this.outValues[y];
             for (let x = 0; x < Math.min(row.length, gridSize.x); x++) {
                 canvas.text(
                     row[x],
-                    this.pos.x + this.cellSize * 1.5 + x * this.cellSize, this.pos.y + this.cellSize * 1.5 + y * this.cellSize,
+                    pos.x + cellSize * 1.5 + x * cellSize, pos.y + cellSize * 1.5 + y * cellSize,
                     { "alignment": { "horizontal": "center", "vertical": "center" } }
                 );
             }
         }
 
         this.groups.forEach(
-            group => this.drawGroup(canvas, group)
+            group => this.drawGroup(canvas, group, override)
         );
     }
 
