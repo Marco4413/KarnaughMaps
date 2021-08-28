@@ -253,7 +253,7 @@ export class KarnaughMap {
         let [x, y, w, h, color] = group;
         
         canvas.stroke(color);
-        canvas.strokeWeigth(style.groups.borderWidth);
+        canvas.strokeWeight(style.groups.borderWidth);
         const maxSize = this.getSize();
 
         w = UMath.constrain(w, 1, maxSize.x);
@@ -311,7 +311,7 @@ export class KarnaughMap {
 
         canvas.fill(style.text.color);
         canvas.stroke(style.lines.color);
-        canvas.strokeWeigth(style.lines.width);
+        canvas.strokeWeight(style.lines.width);
 
         canvas.line(pos.x, pos.y, pos.x + cellSize, pos.y + cellSize);
 
