@@ -133,15 +133,6 @@ window.toggleSelectionColor = (btn, sync) => {
 }
 
 window.addEventListener("load", () => {
-    const isMobile = navigator.userAgentData !== undefined && navigator.userAgentData.mobile;
-
-    { // Selection Confirm
-        const selConf = document.getElementById("selConf");
-        if (selConf !== null && !isMobile) {
-            selConf.style.display = "none";
-        }
-    }
-
     { // Selection Color
         const selColor = document.getElementById("selColor");
         if (selColor !== null) {
