@@ -165,8 +165,8 @@ window.addEventListener("load", () => {
     window.saveImage = () => {
         // Setting the offscreen canvas's size to the size of the map
         const gridSize = GLOBAL_MAP.getSize().add(1);
-        offscreencanvas.element.width = gridSize.x * SAVE_CELL_SIZE + SAVE_BORDER_WIDTH * 2;
-        offscreencanvas.element.height = gridSize.y * SAVE_CELL_SIZE + SAVE_BORDER_WIDTH * 2;
+        offscreenCanvas.element.width = gridSize.x * SAVE_CELL_SIZE + SAVE_BORDER_WIDTH * 2;
+        offscreenCanvas.element.height = gridSize.y * SAVE_CELL_SIZE + SAVE_BORDER_WIDTH * 2;
         offscreenCanvas.clear();
 
         // Moving the map to 0,0 and drawing it on the offscreen canvas
@@ -174,8 +174,8 @@ window.addEventListener("load", () => {
 
         // Creating href and opening it
         const a = document.createElement("a");
-        a.href = offscreencanvas.element.toDataURL("image/png");
-        a.download = "Karnaugh Map";
+        a.href = offscreenCanvas.element.toDataURL("image/png");
+        a.download = "map";
         a.click();
     }
 
