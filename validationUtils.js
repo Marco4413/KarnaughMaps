@@ -75,7 +75,7 @@ export function isValidKarnaughMap(kMap) {
         kMap.groups instanceof Array &&
             testArrayElements(kMap.groups, group => isValidGroup(group, size)) &&
         kMap.outValues instanceof Array &&
-            testArrayElements(kMap.outValues, row => row instanceof Array && testArrayElements(row, cell => cell === 0 || cell === 1)) &&
+            testArrayElements(kMap.outValues, row => row instanceof Array && testArrayElements(row, cell => cell >= 0 && cell <= 2)) &&
         isValidMapStyle(kMap.style) &&
         kMap.varNames instanceof Array && kMap.varNames.length >= kMap.varCount &&
             testArrayElements(kMap.varNames, name => typeof name === "string");

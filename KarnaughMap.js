@@ -140,7 +140,7 @@ export class KarnaughMap {
         if (this.outValues[y] === undefined) { return; }
         if (this.outValues[y][x] === undefined) { return; }
 
-        this.outValues[y][x] = (this.outValues[y][x] + 1) % 2;
+        this.outValues[y][x] = (this.outValues[y][x] + 1) % 3;
     }
 
     /**
@@ -366,7 +366,7 @@ export class KarnaughMap {
             const row = this.outValues[y];
             for (let x = 0; x < Math.min(row.length, gridSize.x); x++) {
                 canvas.text(
-                    row[x],
+                    row[x] < 2 ? row[x] : "X",
                     pos.x + cellSize * 1.5 + x * cellSize, pos.y + cellSize * 1.5 + y * cellSize,
                     { "alignment": { "horizontal": "center", "vertical": "center" } }
                 );
